@@ -210,6 +210,6 @@ describe("lists", () => {
     unmount();
     server.use(http.get("*/bff/ideabank/favorites", () => HttpResponse.json({ posts: [] })));
     renderWithProviders(<FavoritesGrid />);
-    expect(await screen.findByRole("link", { name: "Browse the Idea Bank" })).toHaveAttribute("href", "/ideabank");
+    expect(await screen.findByRole("link", { name: "Browse ideas" })).toHaveAttribute("href", "/ideabank");
   });
 });
