@@ -9,7 +9,8 @@ import { getProfessionalPage, getProfessionalsProject } from "@/features/hiring/
 import { AppError } from "@/shared/errors/app-error";
 import { routes } from "@/shared/config/routes";
 import { Avatar } from "@/shared/ui/avatar";
-import { FramedImage } from "@/shared/ui/framed-image";
+import { buttonVariants } from "@/shared/ui/button";
+import { RemoteImage } from "@/shared/ui/remote-image";
 
 type Params = Promise<{ uuid: string }>;
 
@@ -38,22 +39,33 @@ export default async function ProfessionalPage({ params }: { params: Params }) {
   return (
     <>
       <Breadcrumbs items={[{ label: "Pros", href: routes.hiring.index() }, { label: name }]} />
-      <div className="relative mb-14">
-        <FramedImage src={page.banner} alt={`${name} banner`} priority className="aspect-[4/3] w-full sm:aspect-[16/9] lg:aspect-[21/9]" />
-        <Avatar src={card?.image} name={name} className="absolute bottom-0 left-6 size-24 translate-y-1/2 border-4 border-surface text-2xl" />
-      </div>
-      <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="font-display text-[28px] font-medium text-ink-2">{name}</h1>
-          <p className="text-ink-3">{[card?.profession].filter(Boolean).join(" · ")}</p>
-          {card?.location && (
-            <p className="mt-1 flex items-center gap-1 text-sm text-subtle">
-              <MapPin className="size-4" aria-hidden /> {card.location}
-            </p>
-          )}
+      <section aria-label="Profile" className="mb-8 overflow-hidden rounded-md border border-line bg-surface shadow-sm">
+        <div className="aspect-[2/1] max-h-80 w-full bg-gradient-to-br from-brand-strong via-brand to-brand-bright sm:aspect-[3/1] lg:aspect-[16/5]">
+          {page.banner && <RemoteImage src={page.banner} alt={`${name} banner`} loading="eager" className="size-full object-cover object-center" />}
         </div>
-        <WishlistButton uuid={uuid} initial={card?.isWishedList ?? false} label />
-      </div>
+        <div className="relative px-5 pb-6 sm:px-8">
+          <Avatar src={card?.image} name={name} className="-mt-14 size-28 !rounded-full border-4 border-surface bg-surface text-3xl shadow-sm sm:-mt-20 sm:size-40 sm:text-5xl" />
+          <div className="mt-3 flex flex-wrap items-start justify-between gap-4">
+            <div className="min-w-0">
+              <h1 className="font-display text-[28px] font-medium leading-tight text-ink-2 sm:text-[32px]">{name}</h1>
+              {card?.profession && <p className="mt-1 text-lg text-ink-3">{card.profession}</p>}
+              {card?.location && (
+                <p className="mt-1 flex items-center gap-1.5 text-sm text-subtle">
+                  <MapPin className="size-4" aria-hidden /> {card.location}
+                </p>
+              )}
+            </div>
+            {page.tags.length > 0 && <p className="max-w-xs text-sm text-muted">{page.tags.slice(0, 3).join(" · ")}</p>}
+          </div>
+          <div className="mt-5 flex flex-wrap gap-3">
+            <WishlistButton uuid={uuid} initial={card?.isWishedList ?? false} label />
+            <a href="#contact" className={buttonVariants({ size: "sm" })}>Contact</a>
+            {page.projects && page.projects.length > 0 && (
+              <Link href={routes.hiring.professionalProjects(uuid)} className={buttonVariants({ variant: "secondary", size: "sm" })}>See projects</Link>
+            )}
+          </div>
+        </div>
+      </section>
 
       <div className="grid gap-10 lg:grid-cols-[1fr_320px]">
         <div className="space-y-8">
@@ -96,7 +108,7 @@ export default async function ProfessionalPage({ params }: { params: Params }) {
           )}
         </div>
 
-        <aside className="h-fit space-y-3 border border-line bg-surface p-5 lg:sticky lg:top-24">
+        <aside id="contact" className="h-fit scroll-mt-24 space-y-3 border border-line bg-surface p-5 lg:sticky lg:top-24">
           <h2 className="font-display text-lg font-medium text-ink-2">Contact</h2>
           {page.accessibility != null && <p className="text-sm text-muted">Available {page.accessibility} days a week</p>}
           {email && (

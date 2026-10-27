@@ -41,7 +41,7 @@ export function WishlistButton({ uuid, initial, label = false }: { uuid: string;
       aria-pressed={wished}
       aria-label={wished ? "Remove from wishlist" : "Add to wishlist"}
       disabled={busy}
-      className={cn("inline-flex items-center gap-2 rounded-pill p-2 text-subtle transition-colors hover:text-brand", label && "border border-line px-4 text-sm font-medium")}
+      className={cn("inline-flex items-center gap-2 rounded-pill p-2 text-subtle transition-colors hover:text-brand", label && "h-9 border border-brand px-4 text-[12px] font-bold uppercase tracking-[.02em] text-brand hover:bg-brand-tint")}
     >
       <Heart className={cn("size-5", wished && "fill-brand text-brand")} aria-hidden />
       {label && (wished ? "In your wishlist" : "Add to wishlist")}
