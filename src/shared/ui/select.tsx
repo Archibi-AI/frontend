@@ -17,7 +17,7 @@ export function Select({ label, value, onValueChange, options, placeholder }: {
         {label}
       </label>
       <RSelect.Root value={value} onValueChange={onValueChange}>
-        <RSelect.Trigger aria-labelledby={id} className="flex h-11 w-full items-center justify-between rounded-sm border border-line bg-surface px-3 text-base">
+        <RSelect.Trigger aria-labelledby={id} className="flex h-[46px] w-full items-center justify-between rounded-sm border border-line-strong bg-surface px-4 text-base focus:border-brand focus:shadow-focus focus:outline-none">
           <RSelect.Value placeholder={placeholder} />
           <ChevronDown className="size-4" aria-hidden />
         </RSelect.Trigger>

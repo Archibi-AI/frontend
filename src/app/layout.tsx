@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { cn } from "@/shared/lib/cn";
 import { Shell } from "./_shell/shell";
-import { dmSans, roboto } from "./fonts";
+import { dmSans, poppins } from "./fonts";
 import { Providers } from "./providers";
 import "./globals.css";
 
@@ -16,7 +16,7 @@ export const viewport: Viewport = { themeColor: "#e70039", width: "device-width"
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={cn(dmSans.variable, roboto.variable)}>
+    <html lang="en" className={cn(dmSans.variable, poppins.variable)}>
       <body>
         <Providers>
           <Shell>{children}</Shell>

@@ -16,7 +16,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaHTMLAttributes<H
           id={fieldId}
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? `${fieldId}-error` : undefined}
-          className={cn("min-h-28 w-full rounded-sm border bg-surface p-3 text-base", error ? "border-danger" : "border-line focus:border-brand", className)}
+          className={cn("min-h-28 w-full rounded-sm border bg-surface p-3 text-base", "focus:border-brand focus:shadow-focus focus:outline-none", error ? "border-danger" : "border-line-strong", className)}
           {...props}
         />
         <FieldError id={`${fieldId}-error`} message={error} />

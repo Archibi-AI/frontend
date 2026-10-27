@@ -19,6 +19,10 @@ describe("routes", () => {
     expect(routes.hiring.tag("a/b")).toBe("/hiring/tag/a%2Fb");
     expect(routes.auth.verify("a+b@c.d")).toBe("/auth/signup/verify?email=a%2Bb%40c.d");
   });
+  it("reauth login URL keeps next and adds the marker", () => {
+    expect(routes.auth.reauth("/account")).toBe("/auth/login?next=%2Faccount&reauth=1");
+    expect(routes.auth.reauth()).toBe("/auth/login?reauth=1");
+  });
   it("billing result omits undefined params", () => {
     expect(routes.billing.result({ status: "failed", kind: "subscription", id: "x" })).toBe("/billing/result?status=failed&kind=subscription&id=x");
   });

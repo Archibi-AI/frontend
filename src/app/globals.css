@@ -31,17 +31,24 @@
 
   /* type */
   --font-sans: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-roboto), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-display-face), ui-sans-serif, system-ui, sans-serif;
 
-  /* shape */
-  --radius-sm: 5px;                /* archibi.ca buttons */
-  --radius-md: 12px;               /* cards */
-  --radius-lg: 20px;               /* sheets / dialogs */
-  --radius-pill: 50px;             /* archibi.ca pills, chips */
+  /* night surfaces — Uritect professionals panel (#121212 hero, charcoal cards) */
+  --color-night: #121212;
+  --color-night-2: #222222;
+  --color-night-text: #c6c6c6;
+  --color-night-muted: #b0b0b0;
+
+  /* shape — sharp like the professionals panel (4–8px), pills only for chips (archibi.ca) */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-pill: 50px;
 
   /* elevation */
   --shadow-card: 0 1px 2px rgb(16 24 40 / 0.06), 0 1px 3px rgb(16 24 40 / 0.1);
   --shadow-pop: 0 12px 32px rgb(16 24 40 / 0.16);
+  --shadow-focus: 0 0 0 2px rgb(231 0 57 / 0.1);
 
   /* breakpoints (archibi.ca) */
   --breakpoint-md: 768px;
@@ -50,6 +57,39 @@
 }
 
 /* Dark mode is out of scope for v1 — the app is light-only. */
+@utility hero-display {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(2rem, 3vw, 2.75rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+/* Section label with the red rule — straight from the professionals panel. */
+@utility eyebrow {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-brand);
+}
+@utility eyebrow-rule {
+  display: inline-block;
+  width: 24px;
+  border-top: 2px solid var(--color-brand);
+  margin-right: 8px;
+}
+
+@keyframes fade-rise {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@utility animate-fade-rise {
+  animation: fade-rise 700ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
 html {
   background: var(--color-page);
   color: var(--color-ink);

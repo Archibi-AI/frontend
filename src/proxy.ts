@@ -17,6 +17,13 @@ export async function proxy(req: NextRequest): Promise<NextResponse> {
   const user = verifyUser(req.cookies.get(COOKIE.user)?.value);
   const hasSession = Boolean(refresh && user);
 
+  if (AUTH_PAGES.has(pathname) && req.nextUrl.searchParams.get("reauth") === "1") {
+    // The page that sent us here found the session dead (401 after a forced refresh). A server component
+    // cannot clear cookies, so do it here — otherwise the "already signed in" rule below loops us back.
+    const res = NextResponse.next();
+    clearSession(responseWriter(res));
+    return res;
+  }
   if (AUTH_PAGES.has(pathname) && hasSession) {
     return NextResponse.redirect(new URL(safeNext(req.nextUrl.searchParams.get("next")), req.url));
   }

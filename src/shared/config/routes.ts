@@ -7,6 +7,8 @@ export type BillingSection = "all" | "credits" | "subscriptions";
 export const routes = {
   auth: {
     login: (next?: string) => `/auth/login${next ? `?next=${enc(next)}` : ""}`,
+    /** The session behind this tab was revoked (deleted account, signed out elsewhere): the proxy clears its cookies. */
+    reauth: (next?: string) => `/auth/login?${next ? `next=${enc(next)}&` : ""}reauth=1`,
     signup: () => "/auth/signup",
     verify: (email: string) => `/auth/signup/verify?email=${enc(email)}`,
     forgotPassword: () => "/auth/forgot-password",

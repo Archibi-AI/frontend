@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { routes } from "@/shared/config/routes";
@@ -10,8 +11,8 @@ export function TopBar({ pathname, right }: { pathname: string; right: ReactNode
   return (
     <header className="sticky top-0 z-30 border-b border-line bg-surface/95 backdrop-blur">
       <Container className="flex h-16 items-center gap-8">
-        <a href={routes.wordpress.home} className="font-display text-xl font-bold tracking-tight text-brand">
-          Archibi
+        <a href={routes.wordpress.home} aria-label="Archibi home" className="flex shrink-0 items-center">
+          <Image src="/web-static/brand/archibi-logo.png" alt="Archibi" width={104} height={53} priority className="h-9 w-auto" />
         </a>
         <nav aria-label="Primary" className="hidden flex-1 gap-6 md:flex">
           {PRIMARY_NAV.map((item) => (
@@ -19,7 +20,7 @@ export function TopBar({ pathname, right }: { pathname: string; right: ReactNode
               key={item.href}
               href={item.href}
               aria-current={isActive(pathname, item.match) ? "page" : undefined}
-              className={cn("text-sm font-medium", isActive(pathname, item.match) ? "text-brand" : "text-ink-3 hover:text-ink")}
+              className={cn("text-[13px] font-bold uppercase tracking-[.02em]", isActive(pathname, item.match) ? "text-brand" : "text-ink-3 hover:text-ink")}
             >
               {item.label}
             </Link>

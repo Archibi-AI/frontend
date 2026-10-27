@@ -40,6 +40,12 @@ describe("proxy (F07)", () => {
     expect(withNext.headers.get("location")).toBe("https://archibi.ca/hiring/wishlist");
   });
 
+  it("P3b reauth=1 clears dead cookies and shows the login page (no redirect loop)", async () => {
+    const res = await proxy(request("/auth/login?next=%2Faccount&reauth=1", session(nowS() + 600)));
+    expect(res.headers.get("location")).toBeNull();
+    for (const name of ["ab_at", "ab_rt", "ab_u"]) expect(res.cookies.get(name)?.value).toBe("");
+  });
+
   it("P4 open-redirect guard", async () => {
     const res = await proxy(request("/auth/login?next=https%3A%2F%2Fevil.com", session(nowS() + 600)));
     expect(res.headers.get("location")).toBe("https://archibi.ca/ideabank");
