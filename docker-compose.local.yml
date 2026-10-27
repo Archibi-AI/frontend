@@ -1,0 +1,29 @@
+# Local stack: builds the image and joins the local backend network (uritect_default).
+# Usage: docker compose -f docker-compose.local.yml --env-file .env.local up -d --build
+name: archibi-web-local
+services:
+  archibi_web:
+    build: .
+    image: archibi-web:local
+    container_name: archibi_web_local
+    env_file: .env.local
+    environment:
+      NODE_ENV: production
+    ports: ["127.0.0.1:3100:3000"]
+    depends_on:
+      archibi_web_redis: { condition: service_healthy }
+    networks: [web, backend]
+
+  archibi_web_redis:
+    image: redis:7-alpine
+    container_name: archibi_web_redis_local
+    command: ["redis-server", "--requirepass", "${WEB_REDIS_PASSWORD}"]
+    environment: { WEB_REDIS_PASSWORD: "${WEB_REDIS_PASSWORD}" }
+    networks: [web]
+    healthcheck: { test: ["CMD-SHELL", "redis-cli -a \"$${WEB_REDIS_PASSWORD}\" ping | grep PONG"], interval: 5s, retries: 10 }
+
+networks:
+  web: {}
+  backend:
+    external: true
+    name: uritect_default

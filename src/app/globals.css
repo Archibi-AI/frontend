@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+/* Design tokens — Archibi-AI/documents architecture/09 (archibi.ca Elementor kit × app Color.kt).
+   No color or font-size literal may appear anywhere else in the codebase. */
+@theme {
+  /* brand */
+  --color-brand: #e70039;          /* archibi.ca primary */
+  --color-brand-strong: #da0101;   /* hover / pressed */
+  --color-brand-bright: #fa1e1e;   /* highlights, badges */
+  --color-brand-tint: #fff4f4;     /* app accountPlanTint */
+  --color-brand-soft: #ffcdd2;     /* app uritectLightRed */
+  --color-accent: #cf8585;
+
+  /* neutrals */
+  --color-ink: #111111;
+  --color-ink-2: #1f1f1f;          /* app accountSectionTitle */
+  --color-ink-3: #2b2b2b;          /* app accountRowText */
+  --color-muted: #54595f;
+  --color-subtle: #7a7a7a;
+  --color-line: #e6e6e6;           /* app paywallBorder */
+  --color-line-strong: #b8c0cc;
+  --color-track: #f2f2f2;          /* app paywallTrack */
+  --color-page: #fffcfc;           /* archibi.ca page */
+  --color-surface: #ffffff;
+  --color-surface-alt: #f5f5f7;    /* app accountBackground */
+
+  /* status */
+  --color-success: #16a34a;        /* app freeGreen */
+  --color-danger: #c62828;         /* app uritectRedDark */
+  --color-warning: #b45309;
+
+  /* type */
+  --font-sans: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-roboto), ui-sans-serif, system-ui, sans-serif;
+
+  /* shape */
+  --radius-sm: 5px;                /* archibi.ca buttons */
+  --radius-md: 12px;               /* cards */
+  --radius-lg: 20px;               /* sheets / dialogs */
+  --radius-pill: 50px;             /* archibi.ca pills, chips */
+
+  /* elevation */
+  --shadow-card: 0 1px 2px rgb(16 24 40 / 0.06), 0 1px 3px rgb(16 24 40 / 0.1);
+  --shadow-pop: 0 12px 32px rgb(16 24 40 / 0.16);
+
+  /* breakpoints (archibi.ca) */
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1025px;
+  --breakpoint-xl: 1280px;
+}
+
+/* Dark mode is out of scope for v1 — the app is light-only. */
+html {
+  background: var(--color-page);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
