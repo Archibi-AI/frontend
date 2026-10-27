@@ -55,7 +55,7 @@ export const routes = {
   billing: {
     index: (section: BillingSection = "all") => `/billing?section=${section}`,
     checkout: (kind: "credits" | "subscription", id: string) => `/billing/checkout/${kind}/${enc(id)}`,
-    result: (q: { status: string; kind: "credits" | "subscription"; id: string; months?: number }) => {
+    result: (q: { status: string; kind: "credits" | "subscription"; id: string; months?: number; t?: number }) => {
       const params = new URLSearchParams();
       for (const [k, v] of Object.entries(q)) if (v !== undefined) params.set(k, String(v));
       return `/billing/result?${params.toString()}`;
