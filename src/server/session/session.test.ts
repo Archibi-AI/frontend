@@ -32,6 +32,29 @@ describe("session cookies (F05)", () => {
     expect(Math.abs(at.maxAge - 900)).toBeLessThanOrEqual(1);
   });
 
+  it("Secure follows the origin scheme: on for https, off for the local http stack", async () => {
+    const { resetEnvForTests } = await import("@/server/env");
+    const write = () => {
+      jar.clear();
+      writeSession(writer, { access: "a", access_exp: Date.now() + 9e5, refresh: "r", refresh_exp: Date.now() + 9e8 }, user);
+      return (jar.get(COOKIE.refresh)!.opts as { secure: boolean }).secure;
+    };
+    const saved = { NODE_ENV: process.env.NODE_ENV, PUBLIC_ORIGIN: process.env.PUBLIC_ORIGIN };
+    try {
+      (process.env as Record<string, string>).NODE_ENV = "production";
+      process.env.PUBLIC_ORIGIN = "https://archibi.ca";
+      resetEnvForTests();
+      expect(write()).toBe(true);
+      process.env.PUBLIC_ORIGIN = "http://localhost:3100";
+      resetEnvForTests();
+      expect(write()).toBe(false);
+    } finally {
+      (process.env as Record<string, string>).NODE_ENV = saved.NODE_ENV!;
+      process.env.PUBLIC_ORIGIN = saved.PUBLIC_ORIGIN!;
+      resetEnvForTests();
+    }
+  });
+
   it("clearSession deletes all three", () => {
     writeSession(writer, { access: "a", access_exp: Date.now() + 1e6, refresh: "r", refresh_exp: Date.now() + 1e7 }, user);
     clearSession(writer);

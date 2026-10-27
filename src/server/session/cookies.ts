@@ -23,7 +23,9 @@ export interface SessionWriter {
 export function cookieOptions(expMs: number): CookieOptions {
   return {
     httpOnly: true,
-    secure: env().NODE_ENV === "production",
+    // Secure follows the public origin's scheme: always on for https://archibi.ca, off for the
+    // http://localhost local stack (Safari refuses Secure cookies over plain http).
+    secure: env().NODE_ENV === "production" && env().PUBLIC_ORIGIN.startsWith("https://"),
     sameSite: "lax",
     path: "/",
     maxAge: Math.max(1, Math.floor((expMs - Date.now()) / 1000)),
