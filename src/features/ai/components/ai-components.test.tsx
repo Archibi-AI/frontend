@@ -1,4 +1,4 @@
-import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
@@ -227,6 +227,17 @@ describe("ResultView (RS1, RS2, RS4)", () => {
     const polls = calls;
     await new Promise((r) => setTimeout(r, 3000));
     expect(calls).toBe(polls); // RS1: polling stops on done
+  }, 15000);
+
+  it("Share opens the shared sheet with X, Facebook, LinkedIn, Pinterest, Telegram, Download and Copy link", async () => {
+    server.use(credits(), http.get(`/bff/ai/jobs/${ID}`, () => HttpResponse.json({ state: "done", service: "interior", filters: [], result })));
+    view();
+    await userEvent.click(await screen.findByRole("button", { name: /Share/ }, { timeout: 6000 }));
+    const dialog = await screen.findByRole("dialog");
+    for (const name of ["X", "Facebook", "LinkedIn", "Pinterest", "Telegram"]) expect(within(dialog).getByRole("link", { name })).toBeInTheDocument();
+    expect(within(dialog).getByRole("button", { name: /Download/ })).toBeInTheDocument();
+    expect(within(dialog).getByRole("button", { name: /Copy link/ })).toBeInTheDocument();
+    expect(within(dialog).getByRole("link", { name: "Pinterest" }).getAttribute("href")).toContain(encodeURIComponent(result.output));
   }, 15000);
 
   it("RS2: a failed job replaces the page with the matching outcome route", async () => {

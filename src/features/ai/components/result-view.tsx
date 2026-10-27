@@ -9,8 +9,8 @@ import { routes } from "@/shared/config/routes";
 import { ErrorView } from "@/shared/errors/error-view";
 import { Button, buttonVariants } from "@/shared/ui/button";
 import { RemoteImage } from "@/shared/ui/remote-image";
+import { ShareDialog } from "@/shared/share/share-dialog";
 import { Skeleton } from "@/shared/ui/skeleton";
-import { useToast } from "@/shared/ui/toast";
 import { serviceHref, serviceById } from "../model/services";
 import type { FurnitureResponse, JobView, SubmitResponse } from "../schemas";
 import { useAiSession } from "./ai-session";
@@ -77,16 +77,9 @@ function Summary({ filters }: { filters: JobView["filters"] }) {
 }
 
 function RedesignDone({ projectUuid, job, before }: { projectUuid: string; job: Extract<JobView, { state: "done" }>; before?: string }) {
-  const toast = useToast();
   const [expired, setExpired] = useState(false);
+  const [sharing, setSharing] = useState(false);
   const result = job.result as SubmitResponse;
-  const share = async () => {
-    const url = window.location.href;
-    try {
-      if (navigator.share) await navigator.share({ title: "My Archibi design", url });
-      else { await navigator.clipboard.writeText(url); toast({ kind: "success", title: "Link copied" }); }
-    } catch { /* user dismissed the share sheet */ }
-  };
   return (
     <div>
       {expired ? (
@@ -100,10 +93,18 @@ function RedesignDone({ projectUuid, job, before }: { projectUuid: string; job: 
       )}
       <div className="mt-6 flex flex-wrap justify-center gap-3">
         <a href={`/bff/ai/jobs/${projectUuid}/download`} className={buttonVariants({ variant: "secondary", size: "sm" })}><Download className="size-4" aria-hidden /> Download</a>
-        <Button variant="secondary" size="sm" onClick={share}><Share2 className="size-4" aria-hidden /> Share</Button>
+        <Button variant="secondary" size="sm" onClick={() => setSharing(true)}><Share2 className="size-4" aria-hidden /> Share</Button>
         <Link href={serviceHref(job.service)} className={buttonVariants({ size: "sm" })}>Generate another</Link>
         <Link href={routes.account.projects()} className={buttonVariants({ variant: "ghost", size: "sm" })}>See it in My Projects</Link>
       </div>
+      <ShareDialog
+        open={sharing}
+        onOpenChange={setSharing}
+        title="My Archibi design"
+        url={typeof window === "undefined" ? "" : window.location.href}
+        text="Look at the design I made with Archibi AI"
+        imageUrl={expired ? undefined : result.output}
+      />
       <Summary filters={job.filters} />
       {result.professionals.length > 0 && (
         <section aria-labelledby="pros" className="mt-12">
