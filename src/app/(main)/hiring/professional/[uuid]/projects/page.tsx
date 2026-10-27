@@ -28,7 +28,7 @@ export default async function ProfessionalProjectsPage({ params }: { params: Par
     <>
       <Breadcrumbs items={[{ label: "Pros", href: routes.hiring.index() }, { label: name, href: routes.hiring.professional(uuid) }, { label: "Projects" }]} />
       <PageHeading eyebrow="Archibi Pros" title={`${name}'s projects`} />
-      <ProjectGrid uuid={uuid} initial={projects} />
+      <ProjectGrid uuid={uuid} initial={projects} professionalName={name} />
     </>
   );
 }

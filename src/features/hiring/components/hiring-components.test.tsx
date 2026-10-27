@@ -10,6 +10,8 @@ import { CategoryGrid } from "./category-grid";
 import { FilterPanel } from "./filter-panel";
 import { HiringTabs } from "./hiring-tabs";
 import { ProfessionalList } from "./professional-list";
+import { ProjectTile } from "./project-grid";
+import { shareText } from "./project-dialog";
 import { WishlistButton } from "./wishlist-button";
 
 setupComponentTest();
@@ -91,5 +93,29 @@ describe("HiringTabs / CategoryGrid / FilterPanel", () => {
     await userEvent.click(screen.getByRole("button", { name: "Apply" }));
     const expected = Buffer.from(JSON.stringify({ tags: ["Classic"] })).toString("base64url");
     expect(router.replace).toHaveBeenCalledWith(`/hiring/x?filters=${expected}`, { scroll: false });
+  });
+});
+
+describe("Project dialog (ProPostScreen)", () => {
+  const project = { uuid: 31, image: "https://signed.example/31.jpg", title: "Loft in Toronto", location: "Toronto", description: "Open plan loft." };
+  it("a project card opens the popup with title, location and description; Esc closes it", async () => {
+    renderWithProviders(<ProjectTile project={project} professionalName="Alice Morgan" />);
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Open project Loft in Toronto" }));
+    const dialog = await screen.findByRole("dialog");
+    expect(dialog).toHaveTextContent("Loft in Toronto");
+    expect(dialog).toHaveTextContent("Toronto");
+    expect(dialog).toHaveTextContent("Open plan loft.");
+    await userEvent.keyboard("{Escape}");
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+  });
+  it("shares with the app's text when the browser has no share sheet (copies it)", async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    vi.stubGlobal("navigator", { ...navigator, share: undefined, clipboard: { writeText } });
+    renderWithProviders(<ProjectTile project={project} professionalName="Alice Morgan" />);
+    await userEvent.click(screen.getByRole("button", { name: "Open project Loft in Toronto" }));
+    await userEvent.click(await screen.findByRole("button", { name: "Share" }));
+    expect(writeText).toHaveBeenCalledWith(expect.stringContaining(shareText("Alice Morgan", project)));
+    expect(shareText("Alice Morgan", project)).toBe("Look at the project i found at Archibi designed by Alice Morgan\nLoft in Toronto\nOpen plan loft.");
   });
 });

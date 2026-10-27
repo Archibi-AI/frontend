@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { isUuid, ProjectTile, WishlistButton } from "@/features/hiring";
 import { Breadcrumbs } from "@/features/hiring/components/breadcrumbs";
 import { recallProfessional } from "@/features/hiring/server/card-cache";
-import { getProfessionalPage } from "@/features/hiring/server/repository";
+import { getProfessionalPage, getProfessionalsProject } from "@/features/hiring/server/repository";
 import { AppError } from "@/shared/errors/app-error";
 import { routes } from "@/shared/config/routes";
 import { Avatar } from "@/shared/ui/avatar";
@@ -22,13 +22,16 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 export default async function ProfessionalPage({ params }: { params: Params }) {
   const { uuid } = await params;
   if (!isUuid(uuid)) notFound();
-  const [page, card] = await Promise.all([
+  const [page, card, described] = await Promise.all([
     getProfessionalPage(uuid).catch((e) => {
       if (e instanceof AppError && (e.code === "NOT_FOUND" || e.status === 404)) notFound();
       throw e;
     }),
     recallProfessional(uuid),
+    // the pro page lists projects without descriptions; the dialog needs them (the app has them from the projects list)
+    getProfessionalsProject(1, uuid).then((r) => r.projects).catch(() => []),
   ]);
+  const descriptions = new Map(described.map((p) => [p.uuid, p.description ?? ""]));
   const name = card?.fullname || "Professional";
   const { email, phone, website } = page.contacts;
 
@@ -85,7 +88,7 @@ export default async function ProfessionalPage({ params }: { params: Params }) {
               <ul className="grid grid-cols-2 gap-3 md:grid-cols-3">
                 {page.projects.map((p) => (
                   <li key={p.uuid}>
-                    <ProjectTile project={p} />
+                    <ProjectTile project={{ ...p, description: descriptions.get(p.uuid) }} professionalName={name} />
                   </li>
                 ))}
               </ul>

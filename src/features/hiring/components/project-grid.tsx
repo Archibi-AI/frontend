@@ -8,10 +8,12 @@ import { fetchPage, nextPageParam } from "@/shared/lib/paging";
 import { EmptyState } from "@/shared/ui/empty-state";
 import { InfiniteSentinel } from "@/shared/ui/infinite-list";
 import { RemoteImage } from "@/shared/ui/remote-image";
+import { useState } from "react";
+import { ProjectDialog, type ProjectInfo } from "./project-dialog";
 import type { ProProject } from "../schemas";
 
 /** All projects of a professional, 20 per page; page 1 server-rendered. */
-export function ProjectGrid({ uuid, initial }: { uuid: string; initial: ProProject[] }) {
+export function ProjectGrid({ uuid, initial, professionalName }: { uuid: string; initial: ProProject[]; professionalName: string }) {
   const q = useInfiniteQuery({
     queryKey: ["hiring", "projects", uuid],
     initialPageParam: 1,
@@ -28,7 +30,7 @@ export function ProjectGrid({ uuid, initial }: { uuid: string; initial: ProProje
       <ul className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
         {items.map((p) => (
           <li key={p.uuid}>
-            <ProjectTile project={p} />
+            <ProjectTile project={p} professionalName={professionalName} />
           </li>
         ))}
       </ul>
@@ -38,14 +40,19 @@ export function ProjectGrid({ uuid, initial }: { uuid: string; initial: ProProje
   );
 }
 
-export function ProjectTile({ project }: { project: Pick<ProProject, "image" | "title" | "location"> }) {
+/** A project card (ProProjectsCardView): tap opens the project dialog. */
+export function ProjectTile({ project, professionalName }: { project: ProjectInfo; professionalName: string }) {
+  const [open, setOpen] = useState(false);
   return (
-    <figure className="overflow-hidden border border-line bg-surface">
-      <div className="aspect-[4/3] bg-track">{project.image && <RemoteImage src={project.image} alt={project.title} className="size-full object-cover" />}</div>
-      <figcaption className="px-3 py-2">
-        <p className="truncate text-sm font-medium text-ink-2">{project.title || "Project"}</p>
-        {project.location && <p className="truncate text-xs text-subtle">{project.location}</p>}
-      </figcaption>
-    </figure>
+    <>
+      <button type="button" onClick={() => setOpen(true)} aria-label={`Open project ${project.title}`} className="block w-full overflow-hidden border border-line bg-surface text-left transition-shadow hover:shadow-md">
+        <div className="aspect-[4/3] bg-track">{project.image && <RemoteImage src={project.image} alt="" className="size-full object-cover" />}</div>
+        <div className="px-3 py-2">
+          <p className="truncate text-sm font-medium text-ink-2">{project.title || "Project"}</p>
+          {project.location && <p className="truncate text-xs text-subtle">{project.location}</p>}
+        </div>
+      </button>
+      <ProjectDialog project={project} professionalName={professionalName} open={open} onOpenChange={setOpen} />
+    </>
   );
 }
