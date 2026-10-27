@@ -6,13 +6,13 @@ import { buttonVariants } from "@/shared/ui/button";
 
 export function AccountHeader({ username, email, imageUri }: { username: string; email: string; imageUri: string }) {
   return (
-    <header className="mb-8 flex items-center gap-4">
-      <Avatar src={imageUri || null} name={username || email} className="size-16 text-lg" />
+    <header className="mb-8 flex items-center gap-4 rounded-md bg-gradient-to-br from-brand-strong via-brand to-brand-bright p-5 text-white shadow-sm md:p-6">
+      <Avatar src={imageUri || null} name={username || email} className="size-16 border-2 border-white/80 text-lg" />
       <div className="min-w-0 flex-1">
-        <h1 className="truncate font-display text-[26px] font-medium text-ink-2">{username || email}</h1>
-        <p className="truncate text-sm text-subtle">{email}</p>
+        <h1 className="truncate font-display text-[26px] font-medium text-white">{username || email}</h1>
+        <p className="truncate text-sm text-white/80">{email}</p>
       </div>
-      <Link href={routes.account.edit()} className={buttonVariants({ variant: "secondary", size: "sm" })}>
+      <Link href={routes.account.edit()} className={buttonVariants({ variant: "secondary-dark", size: "sm", className: "hover:border-white hover:bg-white hover:text-brand" })}>
         <Pencil className="size-3.5" aria-hidden /> Edit
       </Link>
     </header>
