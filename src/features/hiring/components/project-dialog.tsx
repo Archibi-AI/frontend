@@ -3,7 +3,7 @@ import { MapPin, Share2 } from "lucide-react";
 import { useLayoutEffect, useRef, useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/shared/ui/dialog";
 import { ShareDialog } from "@/shared/share/share-dialog";
-import { RemoteImage } from "@/shared/ui/remote-image";
+import { FramedImage } from "@/shared/ui/framed-image";
 import type { ProProject } from "../schemas";
 
 export type ProjectInfo = Pick<ProProject, "uuid" | "image" | "title" | "location"> & { description?: string };
@@ -31,9 +31,7 @@ export function ProjectDialog({ project, professionalName, open, onOpenChange }:
   return (
     <Dialog open={open} onOpenChange={(o) => { if (!o) setExpanded(false); onOpenChange(o); }}>
       <DialogContent size="md" className="p-0 md:p-0">
-        <div className="aspect-[4/3] bg-track">
-          {project.image && <RemoteImage src={project.image} alt={project.title} className="size-full object-cover" />}
-        </div>
+        <FramedImage src={project.image} alt={project.title} className="aspect-[4/3]" />
         <div className="space-y-3 p-5">
           <div className="flex items-start gap-3">
             <DialogTitle className={`min-w-0 flex-1 text-base ${expanded ? "" : "line-clamp-1"}`}>

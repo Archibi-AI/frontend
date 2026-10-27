@@ -7,7 +7,7 @@ import { bffFetch } from "@/shared/http/bff-fetch";
 import { fetchPage, nextPageParam } from "@/shared/lib/paging";
 import { EmptyState } from "@/shared/ui/empty-state";
 import { InfiniteSentinel } from "@/shared/ui/infinite-list";
-import { RemoteImage } from "@/shared/ui/remote-image";
+import { FramedImage } from "@/shared/ui/framed-image";
 import { useState } from "react";
 import { ProjectDialog, type ProjectInfo } from "./project-dialog";
 import type { ProProject } from "../schemas";
@@ -46,7 +46,7 @@ export function ProjectTile({ project, professionalName }: { project: ProjectInf
   return (
     <>
       <button type="button" onClick={() => setOpen(true)} aria-label={`Open project ${project.title}`} className="block w-full overflow-hidden border border-line bg-surface text-left transition-shadow hover:shadow-md">
-        <div className="aspect-[4/3] bg-track">{project.image && <RemoteImage src={project.image} alt="" className="size-full object-cover" />}</div>
+        <FramedImage src={project.image} alt="" className="aspect-[4/3]" />
         <div className="px-3 py-2">
           <p className="truncate text-sm font-medium text-ink-2">{project.title || "Project"}</p>
           {project.location && <p className="truncate text-xs text-subtle">{project.location}</p>}

@@ -166,8 +166,8 @@ describe("PostView / PostModal", () => {
     renderWithProviders(<PostView post={post()} />);
     await userEvent.click(screen.getByRole("button", { name: /Share/ }));
     const sheet = await screen.findByRole("dialog");
-    for (const name of ["X (Twitter)", "LinkedIn", "Pinterest", "Telegram", "Download", "Copy link"]) expect(within(sheet).getByText(name)).toBeInTheDocument();
-    const pinterest = new URL(within(sheet).getByRole("link", { name: /Pinterest/ }).getAttribute("href")!);
+    for (const name of ["X", "Facebook", "LinkedIn", "Pinterest", "Telegram"]) expect(within(sheet).getByRole("link", { name })).toBeInTheDocument();
+    const pinterest = new URL(within(sheet).getByRole("link", { name: "Pinterest" }).getAttribute("href")!);
     expect(pinterest.searchParams.get("url")).toBe(`${window.location.origin}/ideabank/post/341`);
     expect(pinterest.searchParams.get("media")).toBe("https://signed.example/341.jpg");
     await userEvent.click(within(sheet).getByRole("button", { name: /Copy link/ }));

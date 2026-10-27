@@ -9,7 +9,7 @@ import { getProfessionalPage, getProfessionalsProject } from "@/features/hiring/
 import { AppError } from "@/shared/errors/app-error";
 import { routes } from "@/shared/config/routes";
 import { Avatar } from "@/shared/ui/avatar";
-import { RemoteImage } from "@/shared/ui/remote-image";
+import { FramedImage } from "@/shared/ui/framed-image";
 
 type Params = Promise<{ uuid: string }>;
 
@@ -38,9 +38,9 @@ export default async function ProfessionalPage({ params }: { params: Params }) {
   return (
     <>
       <Breadcrumbs items={[{ label: "Pros", href: routes.hiring.index() }, { label: name }]} />
-      <div className="relative mb-16 aspect-[16/5] min-h-40 overflow-hidden bg-track">
-        {page.banner && <RemoteImage src={page.banner} alt="" loading="eager" className="size-full object-cover" />}
-        <Avatar src={card?.image} name={name} className="absolute -bottom-0 left-6 size-24 translate-y-1/2 border-4 border-surface text-2xl" />
+      <div className="relative mb-14">
+        <FramedImage src={page.banner} alt={`${name} banner`} priority className="aspect-[4/3] w-full sm:aspect-[16/9] lg:aspect-[21/9]" />
+        <Avatar src={card?.image} name={name} className="absolute bottom-0 left-6 size-24 translate-y-1/2 border-4 border-surface text-2xl" />
       </div>
       <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
         <div>

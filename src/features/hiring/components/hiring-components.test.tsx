@@ -1,4 +1,4 @@
-import { act, screen, waitFor } from "@testing-library/react";
+import { act, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -114,8 +114,9 @@ describe("Project dialog (ProPostScreen)", () => {
     await userEvent.click(screen.getByRole("button", { name: "Open project Loft in Toronto" }));
     await userEvent.click(await screen.findByRole("button", { name: "Share" }));
     const sheet = (await screen.findAllByRole("dialog")).at(-1)!;
-    for (const name of ["X (Twitter)", "LinkedIn", "Pinterest", "Telegram", "Download", "Copy link"]) expect(sheet).toHaveTextContent(name);
-    expect(screen.getByRole("link", { name: /Telegram/ })).toHaveAttribute("href", expect.stringContaining(encodeURIComponent("designed by Alice Morgan")));
+    for (const name of ["X", "Facebook", "LinkedIn", "Pinterest", "Telegram"]) expect(within(sheet).getByRole("link", { name })).toBeInTheDocument();
+    for (const name of ["Download", "Copy link"]) expect(within(sheet).getByRole("button", { name })).toBeInTheDocument();
+    expect(within(sheet).getByRole("link", { name: "Telegram" })).toHaveAttribute("href", expect.stringContaining(encodeURIComponent("designed by Alice Morgan")));
     expect(shareText("Alice Morgan", project)).toBe("Look at the project i found at Archibi designed by Alice Morgan\nLoft in Toronto\nOpen plan loft.");
   });
 });
