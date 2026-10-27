@@ -109,13 +109,13 @@ describe("Project dialog (ProPostScreen)", () => {
     await userEvent.keyboard("{Escape}");
     await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
   });
-  it("shares with the app's text when the browser has no share sheet (copies it)", async () => {
-    const writeText = vi.fn().mockResolvedValue(undefined);
-    vi.stubGlobal("navigator", { ...navigator, share: undefined, clipboard: { writeText } });
+  it("Share opens the share sheet with the app's text", async () => {
     renderWithProviders(<ProjectTile project={project} professionalName="Alice Morgan" />);
     await userEvent.click(screen.getByRole("button", { name: "Open project Loft in Toronto" }));
     await userEvent.click(await screen.findByRole("button", { name: "Share" }));
-    expect(writeText).toHaveBeenCalledWith(expect.stringContaining(shareText("Alice Morgan", project)));
+    const sheet = (await screen.findAllByRole("dialog")).at(-1)!;
+    for (const name of ["X (Twitter)", "LinkedIn", "Pinterest", "Telegram", "Download", "Copy link"]) expect(sheet).toHaveTextContent(name);
+    expect(screen.getByRole("link", { name: /Telegram/ })).toHaveAttribute("href", expect.stringContaining(encodeURIComponent("designed by Alice Morgan")));
     expect(shareText("Alice Morgan", project)).toBe("Look at the project i found at Archibi designed by Alice Morgan\nLoft in Toronto\nOpen plan loft.");
   });
 });

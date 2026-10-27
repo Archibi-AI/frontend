@@ -1,5 +1,5 @@
 "use client";
-import { Sparkles } from "lucide-react";
+import { Share2, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import type { AppError } from "@/shared/errors/app-error";
@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogTitle } from "@/shared/ui/dialog";
 import { EmptyState } from "@/shared/ui/empty-state";
 import { InfiniteSentinel } from "@/shared/ui/infinite-list";
 import { Masonry } from "@/shared/ui/masonry";
+import { ShareDialog } from "@/shared/share/share-dialog";
 import { RemoteImage } from "@/shared/ui/remote-image";
 import { MasonrySkeleton } from "@/shared/ui/skeleton";
 import type { GeneratedImage } from "../schemas";
@@ -21,6 +22,7 @@ export function ProjectsGrid() {
     key: ["me", "projects"], path: "/bff/account/projects", pick: (r) => r.generatedImages,
   });
   const [open, setOpen] = useState<GeneratedImage>();
+  const [sharing, setSharing] = useState(false);
 
   if (list.isPending) return <MasonrySkeleton />;
   if (list.isError) return <ErrorView error={list.error as AppError} onRetry={() => list.refetch()} />;
@@ -50,13 +52,17 @@ export function ProjectsGrid() {
           {open && (
             <div className="space-y-4">
               <RemoteImage src={open.generatedImage} alt="AI generated design" className="mx-auto max-h-[70vh] w-auto rounded-md object-contain" />
-              <div className="flex justify-center">
+              <div className="flex flex-wrap justify-center gap-3">
+                <Button variant="secondary" size="sm" onClick={() => setSharing(true)}>
+                  <Share2 className="size-4" aria-hidden /> Share
+                </Button>
                 <a href={open.generatedImage} target="_blank" rel="noopener noreferrer" className={buttonVariants({ variant: "secondary", size: "sm" })}>Open full size</a>
               </div>
             </div>
           )}
         </DialogContent>
       </Dialog>
+      {open && <ShareDialog open={sharing} onOpenChange={setSharing} title="My Archibi design" url={open.generatedImage} text="Look at the design I created with Archibi AI" imageUrl={open.generatedImage} />}
       {list.isFetchingNextPage && <p className="py-6 text-center text-sm text-subtle">Loading…</p>}
       {!list.hasNextPage && list.items.length > 20 && <div className="py-6 text-center"><Button variant="ghost" size="sm" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>Back to top</Button></div>}
     </>

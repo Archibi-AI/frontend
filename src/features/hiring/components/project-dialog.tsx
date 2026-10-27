@@ -2,8 +2,8 @@
 import { MapPin, Share2 } from "lucide-react";
 import { useLayoutEffect, useRef, useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/shared/ui/dialog";
+import { ShareDialog } from "@/shared/share/share-dialog";
 import { RemoteImage } from "@/shared/ui/remote-image";
-import { useToast } from "@/shared/ui/toast";
 import type { ProProject } from "../schemas";
 
 export type ProjectInfo = Pick<ProProject, "uuid" | "image" | "title" | "location"> & { description?: string };
@@ -16,7 +16,7 @@ export const shareText = (name: string, p: ProjectInfo) => `Look at the project 
  * "See more" / "See less" that appears only when something is cut off (or is expanded).
  */
 export function ProjectDialog({ project, professionalName, open, onOpenChange }: { project: ProjectInfo; professionalName: string; open: boolean; onOpenChange: (open: boolean) => void }) {
-  const toast = useToast();
+  const [sharing, setSharing] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [overflows, setOverflows] = useState(false);
   const title = useRef<HTMLHeadingElement>(null);
@@ -27,19 +27,6 @@ export function ProjectDialog({ project, professionalName, open, onOpenChange }:
     const cut = (el: HTMLElement | null) => !!el && el.scrollHeight > el.clientHeight + 1;
     setOverflows(cut(title.current) || cut(description.current));
   }, [open, expanded, project]);
-
-  async function share() {
-    const text = shareText(professionalName, project);
-    try {
-      if (navigator.share) await navigator.share({ title: project.title, text, url: window.location.href });
-      else {
-        await navigator.clipboard.writeText(`${text}\n${window.location.href}`);
-        toast({ kind: "success", title: "Copied to clipboard" });
-      }
-    } catch (e) {
-      if (!(e instanceof DOMException && e.name === "AbortError")) toast({ kind: "error", title: "Couldn't share this project." });
-    }
-  }
 
   return (
     <Dialog open={open} onOpenChange={(o) => { if (!o) setExpanded(false); onOpenChange(o); }}>
@@ -52,7 +39,7 @@ export function ProjectDialog({ project, professionalName, open, onOpenChange }:
             <DialogTitle className={`min-w-0 flex-1 text-base ${expanded ? "" : "line-clamp-1"}`}>
               <span ref={title} className={`block ${expanded ? "" : "line-clamp-1"}`}>{project.title || "Project"}</span>
             </DialogTitle>
-            <button type="button" onClick={share} aria-label="Share" className="shrink-0 rounded-pill p-2 text-subtle hover:text-brand">
+            <button type="button" onClick={() => setSharing(true)} aria-label="Share" className="shrink-0 rounded-pill p-2 text-subtle hover:text-brand">
               <Share2 className="size-5" aria-hidden />
             </button>
           </div>
@@ -73,6 +60,7 @@ export function ProjectDialog({ project, professionalName, open, onOpenChange }:
           )}
         </div>
       </DialogContent>
+      <ShareDialog open={sharing} onOpenChange={setSharing} title={project.title} url={typeof window === "undefined" ? "" : window.location.href} text={shareText(professionalName, project)} imageUrl={project.image} />
     </Dialog>
   );
 }

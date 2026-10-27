@@ -1,29 +1,19 @@
 "use client";
 import { ExternalLink, Share2 } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 import { routes } from "@/shared/config/routes";
 import { buttonVariants, Button } from "@/shared/ui/button";
 import { Chip } from "@/shared/ui/chip";
 import { RemoteImage } from "@/shared/ui/remote-image";
-import { useToast } from "@/shared/ui/toast";
+import { ShareDialog } from "@/shared/share/share-dialog";
 import type { PostView as PostData } from "../schemas";
 import { FavoriteButton } from "./favorite-button";
 
 /** One idea: image, style tags (→ tag pages), favorite, share. Used by the page and the modal. The app's Play Store link is not shown on the web. */
 export function PostView({ post, layout = "page" }: { post: PostData; layout?: "page" | "modal" }) {
-  const toast = useToast();
-  async function share() {
-    const url = `${window.location.origin}${routes.ideabank.post(post.uuid)}`;
-    try {
-      if (navigator.share) await navigator.share({ title: "Archibi design idea", url });
-      else {
-        await navigator.clipboard.writeText(url);
-        toast({ kind: "info", title: "Link copied" });
-      }
-    } catch {
-      /* share sheet dismissed */
-    }
-  }
+  const [sharing, setSharing] = useState(false);
+  const url = typeof window === "undefined" ? routes.ideabank.post(post.uuid) : `${window.location.origin}${routes.ideabank.post(post.uuid)}`;
 
   return (
     <div className={layout === "modal" ? "grid gap-6 md:grid-cols-[1fr_280px]" : "grid gap-8 lg:grid-cols-[1fr_320px]"}>
@@ -55,7 +45,7 @@ export function PostView({ post, layout = "page" }: { post: PostData; layout?: "
         )}
         <div className="flex flex-wrap gap-3">
           <FavoriteButton uuid={post.uuid} initial={post.isFavorite} />
-          <Button variant="secondary" size="sm" onClick={share}>
+          <Button variant="secondary" size="sm" onClick={() => setSharing(true)}>
             <Share2 className="size-4" aria-hidden /> Share
           </Button>
           {post.item && (
@@ -65,6 +55,7 @@ export function PostView({ post, layout = "page" }: { post: PostData; layout?: "
           )}
         </div>
       </aside>
+      <ShareDialog open={sharing} onOpenChange={setSharing} title="Design idea" url={url} text="Look at this design idea I found on Archibi" imageUrl={post.item?.image} />
     </div>
   );
 }

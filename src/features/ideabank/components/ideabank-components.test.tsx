@@ -160,12 +160,17 @@ describe("PostView / PostModal", () => {
     renderWithProviders(<PostView post={post({ isFavorite: true })} />);
     expect(screen.getByRole("button", { name: "Remove from favorites" })).toBeInTheDocument();
   });
-  it("share falls back to copying the link", async () => {
+  it("Share opens the sheet (X, LinkedIn, Pinterest, Telegram, Download, Copy link) for this idea's page and picture", async () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
     Object.defineProperty(navigator, "clipboard", { configurable: true, value: { writeText } });
-    Object.defineProperty(navigator, "share", { configurable: true, value: undefined });
     renderWithProviders(<PostView post={post()} />);
     await userEvent.click(screen.getByRole("button", { name: /Share/ }));
+    const sheet = await screen.findByRole("dialog");
+    for (const name of ["X (Twitter)", "LinkedIn", "Pinterest", "Telegram", "Download", "Copy link"]) expect(within(sheet).getByText(name)).toBeInTheDocument();
+    const pinterest = new URL(within(sheet).getByRole("link", { name: /Pinterest/ }).getAttribute("href")!);
+    expect(pinterest.searchParams.get("url")).toBe(`${window.location.origin}/ideabank/post/341`);
+    expect(pinterest.searchParams.get("media")).toBe("https://signed.example/341.jpg");
+    await userEvent.click(within(sheet).getByRole("button", { name: /Copy link/ }));
     expect(writeText).toHaveBeenCalledWith(`${window.location.origin}/ideabank/post/341`);
     expect(await screen.findByText("Link copied")).toBeInTheDocument();
   });
