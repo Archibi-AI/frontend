@@ -144,7 +144,7 @@ export function StudioForm({ kind, title, subtitle, tip }: StudioProps) {
           </div>
         </div>
       </div>
-      <div className="sticky bottom-0 z-20 mt-8 flex items-center justify-between gap-4 border-t border-line bg-surface/95 py-4 backdrop-blur">
+      <div className="sticky bottom-0 z-20 mt-8 flex items-center justify-between gap-4 border-t border-line bg-surface py-4 shadow-[0_-12px_24px_-16px_rgb(0_0_0/0.25)]">
         <p className="text-sm text-muted" aria-live="polite">
           {credits.data ? creditsText(credits.data.ai_credits) : ""}
           {!file && <span className="ml-2 text-subtle">Choose a photo to continue.</span>}
