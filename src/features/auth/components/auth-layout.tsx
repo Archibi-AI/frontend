@@ -9,14 +9,15 @@ const POINTS = [
   { icon: FolderOpen, title: "One account, everywhere", description: "Your projects and renders stay in sync with the Archibi app." },
 ] as const;
 
-/** Split auth shell — the Uritect professionals panel pattern: dark photo hero on the left, form on the right. */
+/** Split auth shell — the Uritect professionals panel pattern: dark photo hero on the left, form on the right.
+ *  Two equal halves with their content centred, so it stays balanced from 1024 px to ultra-wide screens. */
 export function AuthLayout({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-[calc(100dvh-4rem)]">
-      <aside className="relative hidden w-[45%] shrink-0 overflow-hidden bg-night lg:block" aria-hidden={false}>
-        <Image src="/web-static/brand/auth.jpg" alt="" fill sizes="45vw" className="object-cover" priority />
+      <aside className="relative hidden w-1/2 shrink-0 overflow-hidden bg-night lg:block" aria-hidden={false}>
+        <Image src="/web-static/brand/auth.jpg" alt="" fill sizes="50vw" className="object-cover" priority />
         <div className="absolute inset-0 bg-[linear-gradient(180deg,rgb(18_18_18/.84)_0%,rgb(18_18_18/.9)_55%,rgb(18_18_18/.97)_100%)]" aria-hidden />
-        <div className="relative flex h-full flex-col justify-start gap-10 overflow-y-auto p-12 pt-16">
+        <div className="relative mx-auto flex h-full w-full max-w-[560px] flex-col justify-center gap-10 overflow-y-auto px-12 py-16">
           <div className="animate-fade-rise">
             <h2 className="hero-display mb-4 text-white">
               Design it. Find it.
