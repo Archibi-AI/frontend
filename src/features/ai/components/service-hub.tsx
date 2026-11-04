@@ -6,7 +6,6 @@ import { FramedImage } from "@/shared/ui/framed-image";
 import { cn } from "@/shared/lib/cn";
 import { HOME_FURNITURE, HOME_STUDIO_TITLE, HOME_TOOLS } from "../model/home";
 import { AI_SERVICES, isLocked, serviceById } from "../model/services";
-import { CreditsPill } from "./credits-pill";
 import { StudioHeading } from "./studio-heading";
 import { useCredits, useRecentJobs } from "./use-ai";
 
@@ -17,7 +16,7 @@ export function ServiceHub() {
   const running = (jobs.data ?? []).filter((j) => j.state === "PROVIDER_RUNNING" || j.state === "PROVIDER_DONE" || j.state === "SAVING");
   return (
     <>
-      <StudioHeading aside={<CreditsPill />} />
+      <StudioHeading />
       {running.length > 0 && (
         <section aria-label="In progress" className="mb-8 border border-line bg-surface p-4">
           <h2 className="mb-2 text-sm font-bold uppercase tracking-[.02em] text-ink-2">In progress</h2>

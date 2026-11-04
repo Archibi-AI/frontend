@@ -11,7 +11,8 @@ const Divider = () => <span aria-hidden className="mx-1.5 h-3 w-px bg-line" />;
 
 /** AppActionBar.kt RendersPill: `[crown Pro | Free] · N Renders`. The badge is hidden when the backend sends no `is_pro`. */
 export function CreditsPill() {
-  const { data } = useCredits();
+  const { data, isError } = useCredits();
+  if (!data && isError) return null; // the top bar stays usable without it
   if (!data) return <Skeleton className="h-7 w-[120px] rounded-pill" />;
   return (
     <Link href={routes.billing.index()} aria-live="polite" className="inline-flex items-center whitespace-nowrap rounded-pill border border-line bg-track px-2.5 py-1.5 text-xs leading-none text-[#585858]">

@@ -55,16 +55,23 @@ describe("CreditsPill (AppActionBar.kt RendersPill)", () => {
   it.each([[true, "Pro42 Renders"], [false, "Free42 Renders"], [null, "42 Renders"]])("is_pro %s → %s", async (isPro, text) => {
     server.use(credits({ is_pro: isPro }));
     renderWithProviders(<CreditsPill />);
-    expect(await screen.findByRole("link")).toHaveTextContent(new RegExp(`^${text}$`));
+    const pill = await screen.findByRole("link");
+    expect(pill).toHaveTextContent(new RegExp(`^${text}$`));
+    expect(pill).toHaveAttribute("href", "/billing");
   });
+  it("disappears if the credits cannot be loaded", async () => {
+    server.use(http.get("/bff/ai/credits", () => HttpResponse.json({ error: { code: "SERVER", message: "x" } }, { status: 500 })));
+    const { container } = renderWithProviders(<CreditsPill />);
+    await waitFor(() => expect(container.querySelector(".animate-pulse")).toBeNull(), { timeout: 14_000 });
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+  }, 15_000);
 });
 
 describe("ServiceHub (AH1–AH3)", () => {
-  it("AH2/AH1: credits text, and a restricted plan locks cards with a link carrying the service key", async () => {
+  it("AH1: a restricted plan locks cards with a link carrying the service key", async () => {
     server.use(credits({ service_access: { restricted: true, plan_name: "Starter", allowed_services: ["interior_design"] } }), http.get("/bff/ai/jobs", () => HttpResponse.json([])));
     renderWithProviders(<ServiceHub />);
-    expect(await screen.findByRole("link", { name: "42 Renders" })).toHaveAttribute("href", "/billing");
-    expect(await screen.findByRole("link", { name: "Exterior" })).toHaveAttribute("href", "/ai/service-not-in-plan?service=exterior_design");
+    await waitFor(() => expect(screen.getByRole("link", { name: "Exterior" })).toHaveAttribute("href", "/ai/service-not-in-plan?service=exterior_design"));
     expect(screen.getByRole("link", { name: "Interior" })).toHaveAttribute("href", "/ai/interior");
     expect(screen.getAllByText("Not in your plan")).toHaveLength(4);
   });
