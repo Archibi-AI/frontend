@@ -8,6 +8,7 @@ import { renderWithProviders, setupComponentTest } from "@/test/render";
 import type { FilterResponse } from "../schemas";
 import { AiSessionProvider } from "./ai-session";
 import { BeforeAfterSlider } from "./before-after-slider";
+import { CreditsPill } from "./credits-pill";
 import { FurnitureForm } from "./furniture-form";
 import { FurnitureResults } from "./furniture-results";
 import { AiError, AiServerError, OutOfCredits, ServiceNotInPlan } from "./outcome-card";
@@ -50,11 +51,19 @@ const fields = (form: FormData | undefined): Record<string, string> =>
 const upload = () => userEvent.upload(screen.getByLabelText("Upload a photo"), file());
 const studio = (kind: "Interior" | "sketch" = "Interior") => renderWithProviders(<AiSessionProvider><StudioForm kind={kind} title="Interior Design" tip="tip" /></AiSessionProvider>);
 
+describe("CreditsPill (AppActionBar.kt RendersPill)", () => {
+  it.each([[true, "Pro42 Renders"], [false, "Free42 Renders"], [null, "42 Renders"]])("is_pro %s → %s", async (isPro, text) => {
+    server.use(credits({ is_pro: isPro }));
+    renderWithProviders(<CreditsPill />);
+    expect(await screen.findByRole("link")).toHaveTextContent(new RegExp(`^${text}$`));
+  });
+});
+
 describe("ServiceHub (AH1–AH3)", () => {
   it("AH2/AH1: credits text, and a restricted plan locks cards with a link carrying the service key", async () => {
     server.use(credits({ service_access: { restricted: true, plan_name: "Starter", allowed_services: ["interior_design"] } }), http.get("/bff/ai/jobs", () => HttpResponse.json([])));
     renderWithProviders(<ServiceHub />);
-    expect(await screen.findByText("42 renders left")).toBeInTheDocument();
+    expect(await screen.findByRole("link", { name: "42 Renders" })).toHaveAttribute("href", "/billing");
     expect(await screen.findByRole("link", { name: "Exterior" })).toHaveAttribute("href", "/ai/service-not-in-plan?service=exterior_design");
     expect(screen.getByRole("link", { name: "Interior" })).toHaveAttribute("href", "/ai/interior");
     expect(screen.getAllByText("Not in your plan")).toHaveLength(4);
