@@ -48,7 +48,7 @@ function captureJobPost(): { form?: FormData } {
 const fields = (form: FormData | undefined): Record<string, string> =>
   Object.fromEntries([...(form?.entries() ?? [])].map(([k, v]) => [k, typeof v === "string" ? v : `<file ${v.name}>`]));
 const upload = () => userEvent.upload(screen.getByLabelText("Upload a photo"), file());
-const studio = (kind: "Interior" | "sketch" = "Interior") => renderWithProviders(<AiSessionProvider><StudioForm kind={kind} title="Interior Design" subtitle="s" tip="tip" /></AiSessionProvider>);
+const studio = (kind: "Interior" | "sketch" = "Interior") => renderWithProviders(<AiSessionProvider><StudioForm kind={kind} title="Interior Design" tip="tip" /></AiSessionProvider>);
 
 describe("ServiceHub (AH1–AH3)", () => {
   it("AH2/AH1: credits text, and a restricted plan locks cards with a link carrying the service key", async () => {
@@ -79,6 +79,25 @@ describe("ServiceHub (AH1–AH3)", () => {
 });
 
 describe("StudioForm (IN1, IN4–IN6, SKF2)", () => {
+  it("shows the app's Home heading, with the service name above it", async () => {
+    server.use(credits(), http.get("/bff/ai/filters", () => HttpResponse.json(filters)));
+    studio();
+    expect(screen.getByRole("heading", { level: 1, name: "Let’s design your dream space" })).toBeInTheDocument();
+    expect(screen.getByText("Snap a photo, choose a style, see the magic.")).toBeInTheDocument();
+    expect(screen.getByText("Interior Design")).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Room Type" })).toBeInTheDocument();
+  });
+  it("optional filters use the app's titles; a group collapses and shows its pick", async () => {
+    server.use(credits(), http.get("/bff/ai/filters", () => HttpResponse.json(filters)));
+    studio();
+    await userEvent.click(await screen.findByRole("button", { name: "Optional" }));
+    expect(screen.getByRole("heading", { name: "Materials (Optional)" })).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Oak" }));
+    const group = screen.getByRole("button", { name: /^Floor/ });
+    expect(group).toHaveTextContent("FloorOak");
+    await userEvent.click(group);
+    expect(screen.queryByRole("button", { name: "Oak" })).not.toBeInTheDocument();
+  });
   it("IN5: Generate is disabled until an image is chosen", async () => {
     server.use(credits(), http.get("/bff/ai/filters", () => HttpResponse.json(filters)));
     studio();

@@ -17,6 +17,7 @@ import { useAiSession } from "./ai-session";
 import { creditsText } from "./credits-pill";
 import { FilterRows } from "./filter-rows";
 import { OptionalFilters, type OptionalPick } from "./optional-filters";
+import { StudioHeading } from "./studio-heading";
 import { useCredits, useFilters } from "./use-ai";
 
 const MODES: Array<{ id: Mode; title: string; blurb: string }> = [
@@ -29,12 +30,11 @@ export interface StudioProps {
   /** Redesign page part, or "sketch" for Sketch to Render (which has its own Interior/Exterior/Landscape tabs). */
   kind: RedesignPart | "sketch";
   title: string;
-  subtitle: string;
   tip: string;
 }
 
 /** FilterScreen + sketchToRender DesignScreen on one page: upload, mode/part, filters, prompt, Generate. */
-export function StudioForm({ kind, title, subtitle, tip }: StudioProps) {
+export function StudioForm({ kind, title, tip }: StudioProps) {
   const router = useRouter();
   const session = useAiSession();
   const credits = useCredits();
@@ -92,14 +92,11 @@ export function StudioForm({ kind, title, subtitle, tip }: StudioProps) {
 
   return (
     <>
-      <header className="mb-8">
-        <p className="eyebrow mb-3"><span className="eyebrow-rule" aria-hidden />AI Design Studio</p>
-        <h1 className="font-display text-[28px] font-medium leading-tight text-ink-2 md:text-[32px]">{title}</h1>
-        <p className="mt-2 max-w-xl text-[15px] text-subtle">{subtitle}</p>
-      </header>
+      <StudioHeading eyebrow={title} />
       <div className="grid gap-8 pb-20 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
-        <div className="text-center lg:self-center">
-          <ImageDropzone onFile={(f) => { setFile(f); setError(undefined); }} label="Upload a photo" />
+        {/* One fixed size and place: opening Optional or choosing a photo never moves it. */}
+        <div className="text-center lg:sticky lg:top-24 lg:mt-20 lg:self-start">
+          <ImageDropzone onFile={(f) => { setFile(f); setError(undefined); }} label="Upload a photo" className="h-72" />
           <p className="mt-3 text-[15px] font-semibold text-ink-2" aria-live="polite">{credits.data ? creditsText(credits.data.ai_credits) : ""}</p>
           <p className="mt-1 text-sm text-muted">{tip}</p>
           {error && <p role="alert" className="mt-2 text-sm text-danger">{error}</p>}

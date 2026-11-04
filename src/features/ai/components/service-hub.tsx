@@ -4,9 +4,10 @@ import Link from "next/link";
 import { routes } from "@/shared/config/routes";
 import { FramedImage } from "@/shared/ui/framed-image";
 import { cn } from "@/shared/lib/cn";
-import { HOME_FURNITURE, HOME_HEADING, HOME_STUDIO_TITLE, HOME_TOOLS } from "../model/home";
+import { HOME_FURNITURE, HOME_STUDIO_TITLE, HOME_TOOLS } from "../model/home";
 import { AI_SERVICES, isLocked, serviceById } from "../model/services";
 import { CreditsPill } from "./credits-pill";
+import { StudioHeading } from "./studio-heading";
 import { useCredits, useRecentJobs } from "./use-ai";
 
 /** AH1 locked cards go to service-not-in-plan; AH3 running jobs are listed. */
@@ -16,15 +17,7 @@ export function ServiceHub() {
   const running = (jobs.data ?? []).filter((j) => j.state === "PROVIDER_RUNNING" || j.state === "PROVIDER_DONE" || j.state === "SAVING");
   return (
     <>
-      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="font-display text-[26px] font-bold leading-tight text-[#1a1a1a] md:text-[32px]">
-            {HOME_HEADING.before} <span className="text-brand-strong">{HOME_HEADING.highlight}</span>
-          </h1>
-          <p className="mt-2 text-[15px] text-[#8a8a8a]">{HOME_HEADING.subtitle}</p>
-        </div>
-        <CreditsPill />
-      </div>
+      <StudioHeading aside={<CreditsPill />} />
       {running.length > 0 && (
         <section aria-label="In progress" className="mb-8 border border-line bg-surface p-4">
           <h2 className="mb-2 text-sm font-bold uppercase tracking-[.02em] text-ink-2">In progress</h2>

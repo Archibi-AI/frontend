@@ -5,7 +5,7 @@ import { cn } from "@/shared/lib/cn";
 
 export const MAX_UPLOAD_BYTES = 15 * 1024 * 1024;
 
-export function ImageDropzone({ onFile, maxBytes = MAX_UPLOAD_BYTES, label = "Upload a photo" }: { onFile: (file: File) => void; maxBytes?: number; label?: string }) {
+export function ImageDropzone({ onFile, maxBytes = MAX_UPLOAD_BYTES, label = "Upload a photo", className }: { onFile: (file: File) => void; maxBytes?: number; label?: string; className?: string }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string>();
   const [preview, setPreview] = useState<string>();
@@ -28,11 +28,11 @@ export function ImageDropzone({ onFile, maxBytes = MAX_UPLOAD_BYTES, label = "Up
       onDragLeave={() => setDragging(false)}
       onDrop={(e: DragEvent) => { e.preventDefault(); setDragging(false); accept(e.dataTransfer.files[0]); }}
       onPaste={(e) => accept(e.clipboardData.files[0])}
-      className={cn("relative flex min-h-56 flex-col items-center justify-center rounded-md border-2 border-dashed p-6 text-center", dragging ? "border-brand bg-brand-tint" : "border-line bg-surface")}
+      className={cn("relative flex min-h-56 flex-col items-center justify-center rounded-md border-2 border-dashed p-6 text-center", dragging ? "border-brand bg-brand-tint" : "border-line bg-surface", className)}
     >
       {preview ? (
         // eslint-disable-next-line @next/next/no-img-element -- local object URL preview
-        <img src={preview} alt="Selected upload preview" className="max-h-72 rounded-md object-contain" />
+        <img src={preview} alt="Selected upload preview" className="max-h-72 min-h-0 rounded-md object-contain" />
       ) : (
         <ImagePlus className="size-10 text-subtle" aria-hidden />
       )}
