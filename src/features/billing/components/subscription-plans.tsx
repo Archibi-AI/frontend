@@ -1,13 +1,15 @@
 "use client";
-import { Check } from "lucide-react";
+import { Check, CircleCheck } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { routes } from "@/shared/config/routes";
 import { cn } from "@/shared/lib/cn";
 import { Button, buttonVariants } from "@/shared/ui/button";
+import { RemoteImage } from "@/shared/ui/remote-image";
 import {
   PaywallText,
   defaultPeriod,
+  defaultPlanIndex,
   formatPrice,
   isCurrentOption,
   yearlyFullPrice,
@@ -21,33 +23,48 @@ import { PillButton, PillTrack } from "./pill-tabs";
 import { PlanTitle } from "./plan-title";
 import { PolicyNote } from "./policy-note";
 
-/** KMP PaywallContent → PlanTabs + PlanCard + BillingOptionCard: one pill per plan, the plan card with Monthly / Yearly options. */
+const ROW_COLUMNS = ["", "lg:mx-auto lg:max-w-xl", "lg:grid-cols-2", "lg:grid-cols-3"];
+
+/**
+ * KMP PaywallContent → PlanTabs + PlanCard + BillingOptionCard. Below `lg`: one pill per plan and only that plan's card.
+ * From `lg` up: no pills, every plan's card side by side.
+ */
 export function SubscriptionPlans({ groups, me }: { groups: PlanGroup[]; me: MySubscription | null }) {
-  // Open on the plan the user already has (and its period), so "Current plan" is visible at once.
+  // Open on the plan the user already has, so "Current plan" is visible at once.
   const currentGroup = groups.findIndex((g) => g.options.some((o) => isCurrentOption(me, o)));
-  const [index, setIndex] = useState(Math.max(0, currentGroup));
-  const [chosen, setChosen] = useState<Period | undefined>(() => groups[Math.max(0, currentGroup)]?.options.find((o) => isCurrentOption(me, o))?.period);
-  const group = groups[Math.min(index, groups.length - 1)];
-  if (!group) return <p className="py-10 text-center text-base text-subtle">{PaywallText.empty}</p>;
-  const period = chosen && group.options.some((o) => o.period === chosen) ? chosen : defaultPeriod(group.options);
+  const [index, setIndex] = useState(currentGroup >= 0 ? currentGroup : defaultPlanIndex(groups));
+  if (groups.length === 0) return <p className="py-10 text-center text-base text-subtle">{PaywallText.empty}</p>;
+
+  return (
+    <div>
+      {groups.length > 1 && (
+        <PillTrack label="Plans" className="mb-4 lg:hidden">
+          {groups.map((g, i) => (
+            <PillButton key={g.name} selected={i === index} onClick={() => setIndex(i)}>{g.name}</PillButton>
+          ))}
+        </PillTrack>
+      )}
+      <div className={cn("grid gap-5", ROW_COLUMNS[Math.min(groups.length, 3)])}>
+        {groups.map((group, i) => <PlanCard key={group.name} group={group} me={me} shown={i === index} />)}
+      </div>
+    </div>
+  );
+}
+
+function PlanCard({ group, me, shown }: { group: PlanGroup; me: MySubscription | null; shown: boolean }) {
+  const [chosen, setChosen] = useState<Period | undefined>(() => group.options.find((o) => isCurrentOption(me, o))?.period);
+  const period = chosen ?? defaultPeriod(group.options);
   const selected = group.options.find((o) => o.period === period);
   const monthly = group.options.find((o) => o.period === "month");
   const yearly = group.options.find((o) => o.period === "year");
   const current = selected ? isCurrentOption(me, selected) : false;
 
   return (
-    <div>
-      {groups.length > 1 && (
-        <PillTrack label="Plans" className="mb-4">
-          {groups.map((g, i) => (
-            <PillButton key={g.name} selected={i === index} onClick={() => setIndex(i)}>{g.name}</PillButton>
-          ))}
-        </PillTrack>
-      )}
-      <article className="rounded-lg border border-line bg-surface p-5 shadow-card md:p-6">
-        <PlanTitle name={group.name} />
-        <p className="mt-1 text-sm text-subtle">{selected?.maxCredits ? `${selected.maxCredits} renders every ${period}` : ""}</p>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2" role="radiogroup" aria-label="Billing period">
+    <article aria-label={group.name} className={cn("flex-col rounded-lg border border-line bg-surface p-5 shadow-card md:p-6", shown ? "flex" : "hidden lg:flex")}>
+      <PlanTitle name={group.name} />
+      <p className="mt-1 text-sm text-subtle">{group.shortDescription || (selected?.maxCredits ? `${selected.maxCredits} renders every ${period}` : "")}</p>
+      {!group.isFree && (
+        <div className="mt-4 grid grid-cols-2 gap-3" role="radiogroup" aria-label="Billing period">
           {group.options.map((option) => (
             <OptionCard
               key={option.priceId}
@@ -59,21 +76,37 @@ export function SubscriptionPlans({ groups, me }: { groups: PlanGroup[]; me: MyS
             />
           ))}
         </div>
-        {selected && (
-          current ? (
-            <Button disabled size="lg" className="mt-4 w-full rounded-pill border-track bg-track normal-case tracking-normal text-subtle disabled:opacity-100">
-              <span className="text-base font-semibold">{PaywallText.currentPlan}</span>
-            </Button>
-          ) : (
-            <Link href={routes.billing.checkout("subscription", selected.priceId)} className={cn(buttonVariants({ size: "lg" }), "mt-4 w-full rounded-pill normal-case tracking-normal")}>
-              <span className="text-base font-semibold">{PaywallText.upgradeTo(group.name)}</span>
-            </Link>
-          )
-        )}
-        {selected && <p className="mt-3 text-center text-xs text-subtle">{PaywallText.renewalLine(selected.period)}</p>}
-        <div className="mt-2"><PolicyNote /></div>
-      </article>
-    </div>
+      )}
+      {selected && (
+        current ? (
+          <Button disabled size="lg" className="mt-4 w-full rounded-pill border-track bg-track normal-case tracking-normal text-subtle disabled:opacity-100">
+            <span className="text-base font-semibold">{PaywallText.currentPlan}</span>
+          </Button>
+        ) : (
+          <Link href={routes.billing.checkout("subscription", selected.priceId)} className={cn(buttonVariants({ size: "lg" }), "mt-4 w-full rounded-pill normal-case tracking-normal")}>
+            <span className="text-base font-semibold">{PaywallText.upgradeTo(group.name)}</span>
+          </Link>
+        )
+      )}
+      {selected && <p className="mt-3 text-center text-xs text-subtle">{PaywallText.renewalLine(selected.period)}</p>}
+      {!group.isFree && <div className="mt-2"><PolicyNote /></div>}
+      {group.features.length > 0 && (
+        <ul className="mt-4">
+          {group.features.map((f) => <FeatureRow key={f.uuid} title={f.title} iconUrl={f.iconUrl} />)}
+        </ul>
+      )}
+    </article>
+  );
+}
+
+/** PlanFeatureRow: the feature's 22 px icon, or the outlined check when it has none or it fails to load. */
+function FeatureRow({ title, iconUrl }: { title: string; iconUrl: string }) {
+  const [failed, setFailed] = useState(false);
+  return (
+    <li className="flex items-center gap-3.5 py-2 text-base text-[#585858]">
+      {!iconUrl || failed ? <CircleCheck className="size-[22px] shrink-0" aria-hidden /> : <RemoteImage src={iconUrl} alt="" onError={() => setFailed(true)} className="size-[22px] shrink-0 object-contain" />}
+      {title}
+    </li>
   );
 }
 

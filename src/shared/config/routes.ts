@@ -4,8 +4,10 @@ const enc = encodeURIComponent;
 export type GalleryType = "interior" | "exterior" | "landscape";
 
 export const routes = {
+  home: () => "/",
   auth: {
-    login: (next?: string) => `/auth/login${next ? `?next=${enc(next)}` : ""}`,
+    /** `/` is the default after signing in, so it needs no `next`. */
+    login: (next?: string) => `/auth/login${next && next !== "/" ? `?next=${enc(next)}` : ""}`,
     /** The session behind this tab was revoked (deleted account, signed out elsewhere): the proxy clears its cookies. */
     reauth: (next?: string) => `/auth/login?${next ? `next=${enc(next)}&` : ""}reauth=1`,
     signup: () => "/auth/signup",
@@ -60,6 +62,8 @@ export const routes = {
       return `/billing/result?${params.toString()}`;
     },
   },
+  /** The app's "Join Us Now!" (hiring/.../mainmenu/header.kt). */
+  professionalsPanel: "https://professionals.uritect.com/",
   // WordPress pages (KMP AuthenticationURLs.kt:9-12, ArchibiUrls.kt:8-14)
   wordpress: {
     home: "https://archibi.ca/",
@@ -74,16 +78,17 @@ export const routes = {
 } as const;
 
 /** Prefixes owned by Next (GUARDRAILS R9). nginx (devops/03) uses the same list. */
-export const OWNED_PREFIXES = ["/ideabank", "/hiring", "/ai", "/account", "/billing", "/auth", "/bff", "/_next", "/web-static"] as const;
+export const OWNED_PREFIXES = ["/", "/ideabank", "/hiring", "/ai", "/account", "/billing", "/auth", "/bff", "/_next", "/web-static"] as const;
 /** Pages that require a session — every app screen that reads the user token. */
-export const PROTECTED_PREFIXES = ["/account", "/billing", "/ai", "/hiring/wishlist"] as const;
+export const PROTECTED_PREFIXES = ["/", "/account", "/billing", "/ai", "/hiring/wishlist"] as const;
 
+/** `/` matches only itself: nothing starts with `//` once safeNext has rejected those. */
 const matches = (path: string, prefix: string) => path === prefix || path.startsWith(`${prefix}/`);
 export const isOwnedPath = (path: string) => OWNED_PREFIXES.some((p) => matches(path, p));
 export const isProtectedPath = (path: string) => PROTECTED_PREFIXES.some((p) => matches(path, p));
 
 /** Only same-site, owned, non-BFF paths are valid `next` targets (open-redirect guard). */
-export function safeNext(next: string | null | undefined, fallback = "/ideabank"): string {
+export function safeNext(next: string | null | undefined, fallback: string = routes.home()): string {
   if (!next || !next.startsWith("/") || next.startsWith("//")) return fallback;
   const path = next.split("?")[0] ?? "";
   if (!isOwnedPath(path) || matches(path, "/bff") || matches(path, "/_next")) return fallback;

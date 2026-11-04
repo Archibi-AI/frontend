@@ -19,7 +19,7 @@ function OptionCard({ title, image, selected, onClick }: { title: string; image?
       aria-pressed={selected}
       onClick={onClick}
       className={cn(
-        "flex w-full flex-col overflow-hidden rounded-xl bg-surface text-left outline-offset-2",
+        "flex w-full flex-col items-center justify-center overflow-hidden rounded-xl bg-surface text-center outline-offset-2",
         selected ? "border-2 border-brand" : "border border-line hover:border-line-strong",
       )}
     >
@@ -105,7 +105,7 @@ function SectionBlock({ title, first, children }: { title?: string | null; first
 }
 
 /**
- * FiltersView (filtersRow.kt): one dark dropdown button per filter group — it shows the pick (or the group's name) —
+ * FiltersView (filtersRow.kt): one gray dropdown button per filter group — it shows the pick (or the group's name) —
  * and tapping it opens that group's picker dialog (a bottom sheet on phones, centred on larger screens).
  */
 export function FilterRows({ groups, selection, onPick }: { groups: FilterGroup[]; selection: Record<string, string>; onPick: (group: string, value: string) => void }) {
@@ -113,17 +113,17 @@ export function FilterRows({ groups, selection, onPick }: { groups: FilterGroup[
   const group = groups.find((g) => g.title === open);
   return (
     <>
-      <div role="group" aria-label="Design options" className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+      <div role="group" aria-label="Design options" className="flex flex-wrap justify-center gap-2">
         {groups.map((g) => (
           <button
             key={g.title}
             type="button"
             aria-haspopup="dialog"
             onClick={() => setOpen(g.title)}
-            className="flex h-12 items-center justify-between gap-2 rounded-md bg-ink-2 px-4 text-left text-sm font-bold text-white transition-colors hover:bg-ink"
+            className="relative flex h-12 w-full items-center justify-center rounded-md bg-[#ececec] px-10 text-center text-base font-bold text-ink-2 transition-colors hover:bg-[#e0e0e0] sm:w-[calc(50%-0.25rem)]"
           >
             <span className="truncate">{selection[g.title] || g.title}</span>
-            <ChevronDown className="size-5 shrink-0" aria-hidden />
+            <ChevronDown className="absolute right-3 size-5" aria-hidden />
           </button>
         ))}
       </div>

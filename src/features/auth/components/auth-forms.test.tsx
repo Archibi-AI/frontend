@@ -22,12 +22,12 @@ async function fillLogin(email = "a@b.co", password = "Str0ng-pass!") {
 }
 
 describe("LoginForm (LogInScreen / LogInViewModel)", () => {
-  it("signs in and goes to /ideabank by default", async () => {
+  it("signs in and goes to Home by default", async () => {
     let body: unknown;
     server.use(http.post("*/bff/auth/login", async ({ request }) => { body = await request.json(); return ok({ user, accountRestored: false }); }));
     renderWithProviders(<LoginForm />);
     await fillLogin();
-    await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/ideabank"));
+    await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/"));
     expect(body).toEqual({ email: "a@b.co", password: "Str0ng-pass!" });
   });
 
@@ -44,7 +44,7 @@ describe("LoginForm (LogInScreen / LogInViewModel)", () => {
     nav.search = "next=https%3A%2F%2Fevil.com";
     renderWithProviders(<LoginForm />);
     await fillLogin();
-    await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/ideabank"));
+    await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/"));
   });
 
   it("shows the app's wording for a wrong password and stays on the page", async () => {
@@ -121,7 +121,7 @@ describe("VerifyForm (EmailVerificationScreen)", () => {
     renderWithProviders(<VerifyForm email="a@b.co" />);
     await userEvent.type(screen.getByLabelText("Verification code"), "12 34 56");
     await userEvent.click(screen.getByRole("button", { name: /Verify/ }));
-    await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/ideabank"));
+    await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/"));
     expect(body).toEqual({ email: "a@b.co", code: "123456" });
     expect(await screen.findByText("Registered successfully!")).toBeInTheDocument();
   });

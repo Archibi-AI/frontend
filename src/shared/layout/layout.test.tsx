@@ -19,10 +19,14 @@ describe("app shell (F03)", () => {
     await userEvent.click(pros); // no throw, default prevented
   });
 
-  it("projects tab wins over account for /account/projects (longest match)", () => {
+  it("the app's tabs, with Home active only on /", () => {
+    const { unmount } = render(<BottomNav pathname="/" />);
+    expect(screen.getAllByRole("link").map((l) => l.textContent)).toEqual(["Home", "Projects", "AI", "Ideas", "Pros"]);
+    expect(screen.getByRole("link", { name: /Home/ })).toHaveAttribute("aria-current", "page");
+    unmount();
     render(<BottomNav pathname="/account/projects" />);
     expect(screen.getByRole("link", { name: /Projects/ })).toHaveAttribute("aria-current", "page");
-    expect(screen.getByRole("link", { name: /Account/ })).not.toHaveAttribute("aria-current");
+    expect(screen.getByRole("link", { name: /Home/ })).not.toHaveAttribute("aria-current");
   });
 
   it("signed-out shows Sign in linking to login with next", () => {

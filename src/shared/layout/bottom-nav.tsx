@@ -1,5 +1,5 @@
 "use client";
-import { FolderOpen, Lightbulb, Sparkles, User, Users } from "lucide-react";
+import { FolderOpen, House, Lightbulb, Sparkles, Users } from "lucide-react";
 import Link from "next/link";
 import type { MouseEvent } from "react";
 import { routes } from "@/shared/config/routes";
@@ -7,11 +7,11 @@ import { cn } from "@/shared/lib/cn";
 import { isActive } from "./nav";
 
 const TABS = [
-  { href: routes.ideabank.index(), label: "Ideas", match: "/ideabank", Icon: Lightbulb },
+  { href: routes.home(), label: "Home", match: "/", Icon: House },
   { href: routes.account.projects(), label: "Projects", match: "/account/projects", Icon: FolderOpen },
   { href: routes.ai.index(), label: "AI", match: "/ai", Icon: Sparkles, center: true },
+  { href: routes.ideabank.index(), label: "Ideas", match: "/ideabank", Icon: Lightbulb },
   { href: routes.hiring.index(), label: "Pros", match: "/hiring", Icon: Users },
-  { href: routes.account.index(), label: "Account", match: "/account", Icon: User },
 ] as const;
 
 /** < md only. Re-clicking the active tab does nothing (KMP DoubleTapGuard / navigateToTab). */

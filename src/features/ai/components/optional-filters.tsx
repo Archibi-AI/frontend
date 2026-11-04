@@ -22,17 +22,17 @@ export function OptionalFilters({ data, picks, onPick }: { data: OptionalFilters
         <div className="space-y-5 border-t border-line p-4">
           {palette && palette.options.length > 0 && (
             <div>
-              <h3 className="mb-2 text-sm font-medium text-ink-2">{palette.title}</h3>
-              <div className="flex flex-wrap gap-3" role="group" aria-label={palette.title}>
+              <h3 className="mb-2 text-center text-sm font-medium text-ink-2">{palette.title}</h3>
+              <div className="flex flex-wrap justify-center gap-3" role="group" aria-label={palette.title}>
                 {palette.options.map((p) => (
                   <button
                     key={p.id}
                     type="button"
                     aria-pressed={picks[palette.param]?.id === String(p.id)}
                     onClick={() => toggle(palette.param, p.id, p.name)}
-                    className={cn("flex flex-col items-start gap-1 rounded-md p-1.5 text-xs text-muted", picks[palette.param]?.id === String(p.id) ? "ring-2 ring-brand" : "ring-1 ring-line hover:ring-line-strong")}
+                    className={cn("flex w-36 flex-col items-center justify-center gap-1.5 rounded-md p-2 text-center text-xs text-muted", picks[palette.param]?.id === String(p.id) ? "ring-2 ring-brand" : "ring-1 ring-line hover:ring-line-strong")}
                   >
-                    <span className="flex h-7 w-24 overflow-hidden rounded-sm">
+                    <span className="flex h-7 w-full overflow-hidden rounded-sm">
                       {p.colors.map((c) => <span key={c} className="flex-1" style={{ background: c }} />)}
                     </span>
                     {p.name}
@@ -43,8 +43,8 @@ export function OptionalFilters({ data, picks, onPick }: { data: OptionalFilters
           )}
           {data.materials.map((m) => (
             <div key={m.key}>
-              <h3 className="mb-2 text-sm font-medium text-ink-2">{m.title}</h3>
-              <div className="flex flex-wrap gap-2" role="group" aria-label={m.title}>
+              <h3 className="mb-2 text-center text-sm font-medium text-ink-2">{m.title}</h3>
+              <div className="flex flex-wrap justify-center gap-2" role="group" aria-label={m.title}>
                 {m.options.map((o) => (
                   <button
                     key={o.id}

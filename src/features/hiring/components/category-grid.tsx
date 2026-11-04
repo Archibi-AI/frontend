@@ -14,7 +14,8 @@ export function CategoryGrid({ categories, section }: { categories: HiringCatego
         <li key={c.uuid}>
           <Link href={routes.hiring.category(c.title, section, c.uuid)} className="group block overflow-hidden border border-line bg-surface transition-shadow hover:shadow-md">
             <FramedImage src={c.image} alt="" className="aspect-[4/3]" />
-            <p className="px-4 py-3 font-display text-sm font-medium text-ink-2">{c.title}</p>
+            {/* Fixed height for two lines, so every card in the grid is the same height. */}
+            <p className="flex h-16 items-center justify-center px-3 text-center font-display text-sm font-medium leading-snug text-ink-2"><span className="line-clamp-2">{c.title}</span></p>
           </Link>
         </li>
       ))}

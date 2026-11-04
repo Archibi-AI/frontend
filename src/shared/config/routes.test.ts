@@ -32,12 +32,21 @@ describe("routes", () => {
     expect(isProtectedPath("/hiring")).toBe(false);
     expect(isProtectedPath("/accounting")).toBe(false);
   });
-  it("owned prefixes match nginx (9)", () => expect(OWNED_PREFIXES).toHaveLength(9));
+  it("/ is protected, without protecting anything else", () => {
+    expect(isProtectedPath("/")).toBe(true);
+    expect(isOwnedPath("/")).toBe(true);
+    expect(isProtectedPath("/ideabank")).toBe(false);
+    expect(isOwnedPath("/pricing")).toBe(false);
+  });
+  it("login to / needs no next", () => expect(routes.auth.login("/")).toBe("/auth/login"));
+  it("owned prefixes (10)", () => expect(OWNED_PREFIXES).toHaveLength(10));
   it.each([
-    ["https://evil.com", "/ideabank"],
-    ["//evil.com/x", "/ideabank"],
-    ["/pricing", "/ideabank"],
-    ["/bff/session", "/ideabank"],
+    ["https://evil.com", "/"],
+    ["//evil.com/x", "/"],
+    ["/pricing", "/"],
+    ["/bff/session", "/"],
+    ["/ideabank", "/ideabank"],
+    ["/", "/"],
     ["/hiring/wishlist", "/hiring/wishlist"],
     ["/ai/interior?x=1", "/ai/interior?x=1"],
   ])("safeNext(%s) → %s", (input, expected) => expect(safeNext(input)).toBe(expected));

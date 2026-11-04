@@ -1,13 +1,13 @@
 import { describe, expect, it, vi } from "vitest";
 import type { MySubscription, SubscriptionPlan } from "../schemas";
-import { defaultPeriod, formatPrice, isCurrentOption, splitPlanTitle, stripePlanGroups, yearlyFullPrice, yearlySavingsPercent } from "./catalog";
+import { defaultPeriod, defaultPlanIndex, formatPrice, isCurrentOption, splitPlanTitle, stripePlanGroups, yearlyFullPrice, yearlySavingsPercent } from "./catalog";
 import { outcomeOf, pollUntil, recordBody } from "./checkout";
 import { barcodeValue, buildReceipt, fallbackInvoiceId, formatReceiptDateTime, receiptShareText, receiptStatusOf } from "./receipt";
 import { resolveReturnStatus, statusOfIntent } from "./result";
 import { RecordInputSchema } from "../schemas";
 
 const plan = (over: Partial<SubscriptionPlan> = {}): SubscriptionPlan => ({
-  uuid: 3, name: "Pro", maxCredits: 50, period: "month", platforms: "stripe", stripePriceId: "price_m", isActive: true, image: "", amount: 1999, currency: "cad", ...over,
+  uuid: 3, name: "Pro", maxCredits: 50, period: "month", platforms: "stripe", stripePriceId: "price_m", isActive: true, image: "", amount: 1999, currency: "cad", shortDescription: "", sortOrder: 0, features: [], ...over,
 });
 
 describe("prices (BI1)", () => {
@@ -20,6 +20,22 @@ describe("prices (BI1)", () => {
 });
 
 describe("subscription catalogue (BI2, BI4)", () => {
+  it("orders Free first, then sortOrder, then the monthly price, and opens on the plan after Free", () => {
+    const groups = stripePlanGroups([
+      plan({ uuid: 1, name: "Studio", stripePriceId: "s", amount: 2000 }),
+      plan({ uuid: 2, name: "Plus", stripePriceId: "p", amount: 1000 }),
+      plan({ uuid: 3, name: "Late", stripePriceId: "l", amount: 1, sortOrder: 9 }),
+      plan({ uuid: 4, name: "free", stripePriceId: null, platforms: "both", amount: 0 }),
+    ]);
+    expect(groups.map((g) => g.name)).toEqual(["free", "Plus", "Studio", "Late"]);
+    expect(groups[0]!.isFree).toBe(true);
+    expect(groups[0]!.options).toEqual([]);
+    expect(defaultPlanIndex(groups)).toBe(1);
+    expect(defaultPlanIndex(groups.slice(0, 1))).toBe(0);
+  });
+  it("hides an inactive Free plan", () => {
+    expect(stripePlanGroups([plan({ name: "Free", isActive: false })])).toEqual([]);
+  });
   it("keeps only active, Stripe-priced, website plans and groups month + year under one name", () => {
     const groups = stripePlanGroups([
       plan({ uuid: 4, period: "year", stripePriceId: "price_y", amount: 19900 }),
@@ -30,9 +46,9 @@ describe("subscription catalogue (BI2, BI4)", () => {
       plan({ uuid: 8, name: "Free", stripePriceId: "price_free", amount: 0 }),
       plan({ uuid: 9, name: "Everywhere", platforms: "all", stripePriceId: "price_all" }),
     ]);
-    expect(groups.map((g) => g.name)).toEqual(["Pro", "Everywhere"]);
-    expect(groups[0]!.options.map((o) => o.period)).toEqual(["month", "year"]);
-    expect(defaultPeriod(groups[0]!.options)).toBe("year");
+    expect(groups.map((g) => g.name)).toEqual(["Free", "Pro", "Everywhere"]);
+    expect(groups[1]!.options.map((o) => o.period)).toEqual(["month", "year"]);
+    expect(defaultPeriod(groups[1]!.options)).toBe("year");
   });
   it("computes the yearly saving and the struck-through price", () => {
     const [group] = stripePlanGroups([plan(), plan({ uuid: 4, period: "year", stripePriceId: "price_y", amount: 19900 })]);

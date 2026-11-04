@@ -1,5 +1,6 @@
 export { CategoryGrid } from "./components/category-grid";
 export { FilterPanel } from "./components/filter-panel";
+export { HiringHeader } from "./components/hiring-header";
 export { HiringTabs } from "./components/hiring-tabs";
 export { ProfessionalCard } from "./components/professional-card";
 export { ProfessionalList } from "./components/professional-list";

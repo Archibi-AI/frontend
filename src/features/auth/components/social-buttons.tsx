@@ -38,7 +38,8 @@ export function SocialButtons({ next }: { next: string | null }) {
     <>
       <OrDivider />
       <FormAlert>{error}</FormAlert>
-      <div className="grid grid-cols-2 gap-3">
+      {/* One row only when each column can hold Google's button, which has a 200 px minimum. */}
+      <div className="grid gap-3 min-[460px]:grid-cols-2">
         <GoogleButton onCredential={onGoogle} disabled={busy} />
         <AppleButton next={next} onIdToken={onApple} onError={() => setError(AppMessages.somethingWrong)} disabled={busy} />
       </div>

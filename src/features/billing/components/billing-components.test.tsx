@@ -1,4 +1,4 @@
-import { screen, waitFor } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { describe, expect, it, vi } from "vitest";
@@ -18,7 +18,7 @@ setupComponentTest();
 
 const pack: StripePlan = { productId: "price_p20", priceId: "price_p20", name: "20 renders", image: "", creditsCount: 20, amount: 999, currency: "usd" };
 const sub = (over: Partial<SubscriptionPlan> = {}): SubscriptionPlan => ({
-  uuid: 3, name: "Archibi Pro", maxCredits: 50, period: "month", platforms: "stripe", stripePriceId: "price_m", isActive: true, image: "", amount: 1999, currency: "cad", ...over,
+  uuid: 3, name: "Archibi Pro", maxCredits: 50, period: "month", platforms: "stripe", stripePriceId: "price_m", isActive: true, image: "", amount: 1999, currency: "cad", shortDescription: "", sortOrder: 0, features: [], ...over,
 });
 const groups = stripePlanGroups([sub(), sub({ uuid: 4, period: "year", stripePriceId: "price_y", amount: 19900 })]);
 
@@ -58,6 +58,40 @@ describe("Paywall (BI3, BI4)", () => {
     renderWithProviders(<Paywall {...base} groups={null} subscriptionsUnavailable />);
     expect(screen.getByText(/Subscriptions are not available yet/)).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Are you an enterprise? Contact us" })).toBeInTheDocument();
+  });
+});
+
+describe("Free plan and features (PlanCard.kt)", () => {
+  const free = sub({ uuid: 1, name: "Free", stripePriceId: null, platforms: "both", amount: 0, shortDescription: "Try it out", features: [{ uuid: "f1", title: "3 renders", iconUrl: "" }] });
+  const pro = sub({ uuid: 3, features: [{ uuid: "p1", title: "Interior Design", iconUrl: "https://s/i.png" }] });
+  const base = { groups: stripePlanGroups([pro, free]), subscriptionsUnavailable: false, me: null, userCredits: 0 };
+  it("Free is the first tab, the phone view opens on the next plan, and from lg up there are no tabs and every card shows", () => {
+    renderWithProviders(<Paywall {...base} />);
+    expect(screen.getAllByRole("tab").map((t) => t.textContent)).toEqual(["Free", "Archibi Pro"]);
+    expect(screen.getByRole("tab", { name: "Archibi Pro" })).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("tablist")).toHaveClass("lg:hidden");
+    expect(screen.getByRole("article", { name: "Free" })).toHaveClass("hidden", "lg:flex");
+    expect(screen.getByRole("article", { name: "Archibi Pro" })).not.toHaveClass("hidden");
+  });
+  it("the tab swaps the shown card", async () => {
+    renderWithProviders(<Paywall {...base} />);
+    await userEvent.click(screen.getByRole("tab", { name: "Free" }));
+    expect(screen.getByRole("article", { name: "Free" })).not.toHaveClass("hidden");
+    expect(screen.getByRole("article", { name: "Archibi Pro" })).toHaveClass("hidden");
+  });
+  it("the paid card has its features and an upgrade button", () => {
+    renderWithProviders(<Paywall {...base} />);
+    const card = within(screen.getByRole("article", { name: "Archibi Pro" }));
+    expect(card.getByText("Interior Design")).toBeInTheDocument();
+    expect(card.getByRole("link", { name: "Upgrade to Archibi Pro" })).toBeInTheDocument();
+  });
+  it("the Free card shows only its name, description and features", () => {
+    renderWithProviders(<Paywall {...base} />);
+    const card = within(screen.getByRole("article", { name: "Free" }));
+    expect(card.getByText("Try it out")).toBeInTheDocument();
+    expect(card.getByText("3 renders")).toBeInTheDocument();
+    expect(card.queryByRole("radiogroup")).not.toBeInTheDocument();
+    expect(card.queryByRole("link")).not.toBeInTheDocument();
   });
 });
 

@@ -29,7 +29,7 @@ export function Paywall({ groups, subscriptionsUnavailable, me, userCredits }: P
         </div>
       </section>
 
-      <section aria-labelledby="subs-title" className="max-w-3xl">
+      <section aria-labelledby="subs-title">
         <h2 id="subs-title" className="mb-4 font-display text-xl font-medium text-ink-2">Subscriptions</h2>
         {subscriptionsUnavailable ? (
           <p className="rounded-md border border-line bg-surface px-4 py-6 text-center text-[15px] text-subtle">{PaywallText.unavailable}</p>
@@ -40,7 +40,7 @@ export function Paywall({ groups, subscriptionsUnavailable, me, userCredits }: P
         )}
       </section>
 
-      <div className="max-w-3xl"><EnterpriseCard /></div>
+      <EnterpriseCard />
     </div>
   );
 }

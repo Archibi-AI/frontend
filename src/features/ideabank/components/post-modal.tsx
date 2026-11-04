@@ -9,12 +9,12 @@ import { Skeleton } from "@/shared/ui/skeleton";
 import type { PostView as PostData } from "../schemas";
 import { PostView } from "./post-view";
 
-/** The Idea Bank post popup (GalleryPostDialog.kt): an intercepted route over the feed; Esc / ✕ goes back to it. */
-export function PostModal({ uuid }: { uuid: number }) {
+/** The Idea Bank post popup (GalleryPostDialog.kt): an intercepted route over the feed; Esc / ✕ goes back to it. Home passes `onClose`, since it opens the popup without a route. */
+export function PostModal({ uuid, onClose }: { uuid: number; onClose?: () => void }) {
   const router = useRouter();
   const query = useQuery({ queryKey: ["ideabank", "post", uuid], queryFn: () => bffFetch<PostData>(`/bff/ideabank/posts/${uuid}`), staleTime: 30_000 });
   return (
-    <Dialog open onOpenChange={(open) => !open && router.back()}>
+    <Dialog open onOpenChange={(open) => !open && (onClose ? onClose() : router.back())}>
       <DialogContent size="full">
         <DialogTitle className="sr-only">Design idea</DialogTitle>
         <DialogDescription className="sr-only">Style tags, favorite and share actions for this idea.</DialogDescription>

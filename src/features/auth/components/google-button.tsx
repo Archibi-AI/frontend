@@ -44,7 +44,8 @@ export function GoogleButton({ onCredential, disabled }: { onCredential: (creden
   if (!clientId) return null;
   return (
     <>
-      <Script src="https://accounts.google.com/gsi/client" strategy="afterInteractive" onLoad={() => setLoaded(true)} />
+      {/* onReady, not onLoad: onLoad fires once per page load, so coming back to this page would leave this empty. */}
+      <Script src="https://accounts.google.com/gsi/client" strategy="afterInteractive" onReady={() => setLoaded(true)} />
       <div ref={host} className={cn("h-[44px] w-full overflow-hidden [&>div]:!w-full", disabled && "pointer-events-none opacity-50")} aria-label="Sign in with Google" />
     </>
   );

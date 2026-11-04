@@ -97,10 +97,11 @@ export function StudioForm({ kind, title, subtitle, tip }: StudioProps) {
         <h1 className="font-display text-[28px] font-medium leading-tight text-ink-2 md:text-[32px]">{title}</h1>
         <p className="mt-2 max-w-xl text-[15px] text-subtle">{subtitle}</p>
       </header>
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
-        <div className="lg:sticky lg:top-24 lg:self-start">
+      <div className="grid gap-8 pb-20 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+        <div className="text-center lg:self-center">
           <ImageDropzone onFile={(f) => { setFile(f); setError(undefined); }} label="Upload a photo" />
-          <p className="mt-3 text-sm text-muted">{tip}</p>
+          <p className="mt-3 text-[15px] font-semibold text-ink-2" aria-live="polite">{credits.data ? creditsText(credits.data.ai_credits) : ""}</p>
+          <p className="mt-1 text-sm text-muted">{tip}</p>
           {error && <p role="alert" className="mt-2 text-sm text-danger">{error}</p>}
         </div>
         <div className="min-w-0 space-y-8">
@@ -144,13 +145,10 @@ export function StudioForm({ kind, title, subtitle, tip }: StudioProps) {
           </div>
         </div>
       </div>
-      <div className="sticky bottom-0 z-20 mt-8 flex items-center justify-between gap-4 border-t border-line bg-surface py-4 shadow-[0_-12px_24px_-16px_rgb(0_0_0/0.25)]">
-        <p className="text-sm text-muted" aria-live="polite">
-          {credits.data ? creditsText(credits.data.ai_credits) : ""}
-          {!file && <span className="ml-2 text-subtle">Choose a photo to continue.</span>}
-        </p>
-        <Button onClick={submit} disabled={!file} loading={busy} size="lg">Generate</Button>
-      </div>
+      {/* Floats above the phone tab bar. */}
+      <Button onClick={submit} disabled={!file} loading={busy} size="lg" title={file ? undefined : "Choose a photo to continue."} className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-4 z-20 !rounded-pill shadow-pop disabled:opacity-100 md:bottom-8 md:right-8">
+        Generate
+      </Button>
     </>
   );
 }

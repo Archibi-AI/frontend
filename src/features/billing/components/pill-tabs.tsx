@@ -4,7 +4,7 @@ import { cn } from "@/shared/lib/cn";
 /** KMP PlanTabs: a grey pill track, the selected pill is white with a soft shadow. */
 export function PillTrack({ children, label, className }: { children: ReactNode; label: string; className?: string }) {
   return (
-    <div role="tablist" aria-label={label} className={cn("inline-flex max-w-full gap-1 overflow-x-auto rounded-pill bg-track p-1", className)}>
+    <div role="tablist" aria-label={label} className={cn("inline-flex max-w-full gap-1 overflow-x-auto rounded-pill bg-track p-1 [scrollbar-width:none]", className)}>
       {children}
     </div>
   );

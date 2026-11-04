@@ -11,9 +11,9 @@ export function TopBar({ pathname, right }: { pathname: string; right: ReactNode
   return (
     <header className="sticky top-0 z-30 border-b border-line bg-surface/95 backdrop-blur">
       <Container className="flex h-16 items-center gap-8">
-        <a href={routes.wordpress.home} aria-label="Archibi home" className="flex shrink-0 items-center">
+        <Link href={routes.home()} aria-label="Archibi home" className="flex shrink-0 items-center">
           <Image src="/web-static/brand/archibi-logo.png" alt="Archibi" width={104} height={53} priority className="h-9 w-auto" />
-        </a>
+        </Link>
         <nav aria-label="Primary" className="hidden flex-1 gap-6 md:flex">
           {PRIMARY_NAV.map((item) => (
             <Link

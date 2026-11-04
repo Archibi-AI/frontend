@@ -8,6 +8,7 @@ import { renderWithProviders, setupComponentTest } from "@/test/render";
 import type { ProfessionalSimple } from "../schemas";
 import { CategoryGrid } from "./category-grid";
 import { FilterPanel } from "./filter-panel";
+import { HiringHeader } from "./hiring-header";
 import { HiringTabs } from "./hiring-tabs";
 import { ProfessionalList } from "./professional-list";
 import { ProjectTile } from "./project-grid";
@@ -118,5 +119,19 @@ describe("Project dialog (ProPostScreen)", () => {
     for (const name of ["Download", "Copy link"]) expect(within(sheet).getByRole("button", { name })).toBeInTheDocument();
     expect(within(sheet).getByRole("link", { name: "Telegram" })).toHaveAttribute("href", expect.stringContaining(encodeURIComponent("designed by Alice Morgan")));
     expect(shareText("Alice Morgan", project)).toBe("Look at the project i found at Archibi designed by Alice Morgan\nLoft in Toronto\nOpen plan loft.");
+  });
+});
+
+describe("HiringHeader", () => {
+  const header = { imageHeader: "https://s/banner.jpg", titleHeader: "Build the Future", tags: ["Urban Planner", "Home Stager", "Art Curator"] };
+  it("the phone version mirrors the app: Join Us Now!, Popular Tags, two tag rows", () => {
+    renderWithProviders(<HiringHeader header={header} />);
+    const phone = within(screen.getByTestId("hiring-phone-header"));
+    expect(phone.getByText("Are You a Professional?")).toBeInTheDocument();
+    expect(phone.getByRole("link", { name: "Join Us Now!" })).toHaveAttribute("href", "https://professionals.uritect.com/");
+    expect(phone.getByRole("heading", { name: "Popular Tags" })).toBeInTheDocument();
+    expect(phone.getAllByRole("list").map((l) => within(l).getAllByRole("link").map((a) => a.textContent))).toEqual([["Urban Planner", "Art Curator"], ["Home Stager"]]);
+    expect(phone.getByRole("link", { name: "Urban Planner" })).toHaveAttribute("href", "/hiring/tag/Urban%20Planner");
+    expect(phone.getByRole("link", { name: /My wishlist/ })).toHaveAttribute("href", "/hiring/wishlist");
   });
 });

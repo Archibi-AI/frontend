@@ -45,22 +45,37 @@ export interface PlanOption {
   maxCredits: number;
   plan: SubscriptionPlan;
 }
-export interface PlanGroup { name: string; options: PlanOption[] }
+/** `isFree` = KMP isFreePlan(): the card shows only its name and features, with no billing options or button. */
+export interface PlanGroup { name: string; isFree: boolean; shortDescription: string; features: SubscriptionPlan["features"]; sortOrder: number; options: PlanOption[] }
 
 const periodOf = (value: string): Period => (["year", "yearly", "annual"].includes(value.trim().toLowerCase()) ? "year" : "month");
 
-/** Sellable on the website: active, has a Stripe price, platform stripe/all. Rows with the same name become one card (monthly + yearly). */
+const isFreeName = (name: string) => name.trim().toLowerCase() === "free";
+const monthlyAmount = (g: PlanGroup) => (g.options.find((o) => o.period === "month") ?? g.options[0])?.amount ?? 0;
+
+/**
+ * Sellable on the website: active, has a Stripe price, platform stripe/all. Rows with the same name become one card (monthly + yearly).
+ * The Free plan is never sold, so it skips those checks (services.py build_catalog). Order = KMP sortedFreeFirst.
+ */
 export function stripePlanGroups(plans: SubscriptionPlan[]): PlanGroup[] {
   const groups = new Map<string, PlanGroup>();
   for (const plan of plans) {
-    if (!plan.stripePriceId || !plan.isActive || !WEB_PLATFORMS.has(plan.platforms.toLowerCase())) continue;
-    if (plan.name.trim().toLowerCase() === "free") continue;
-    const group = groups.get(plan.name) ?? { name: plan.name, options: [] };
-    group.options.push({ period: periodOf(plan.period), priceId: plan.stripePriceId, amount: plan.amount, currency: plan.currency, maxCredits: plan.maxCredits, plan });
+    const isFree = isFreeName(plan.name);
+    if (!plan.isActive) continue;
+    if (!isFree && (!plan.stripePriceId || !WEB_PLATFORMS.has(plan.platforms.toLowerCase()))) continue;
+    const group = groups.get(plan.name) ?? { name: plan.name, isFree, shortDescription: plan.shortDescription, features: plan.features, sortOrder: plan.sortOrder, options: [] };
+    if (!group.features.length) group.features = plan.features;
+    if (!group.shortDescription) group.shortDescription = plan.shortDescription;
+    if (!isFree && plan.stripePriceId) group.options.push({ period: periodOf(plan.period), priceId: plan.stripePriceId, amount: plan.amount, currency: plan.currency, maxCredits: plan.maxCredits, plan });
     groups.set(plan.name, group);
   }
-  return [...groups.values()].map((g) => ({ ...g, options: g.options.sort((a, b) => (a.period === b.period ? 0 : a.period === "month" ? -1 : 1)) }));
+  return [...groups.values()]
+    .map((g) => ({ ...g, options: g.options.sort((a, b) => (a.period === b.period ? 0 : a.period === "month" ? -1 : 1)) }))
+    .sort((a, b) => Number(b.isFree) - Number(a.isFree) || a.sortOrder - b.sortOrder || monthlyAmount(a) - monthlyAmount(b));
 }
+
+/** KMP defaultPlanIndex: Free sorts first, but the paywall opens on the next plan when there is one. */
+export const defaultPlanIndex = (groups: PlanGroup[]): number => (groups.length > 1 && groups[0]?.isFree ? 1 : 0);
 
 /** KMP calculateYearlySavingsPercent: null unless the year is cheaper than twelve months by at least 1 %. */
 export function yearlySavingsPercent(monthly: PlanOption | undefined, yearly: PlanOption | undefined): number | null {

@@ -34,8 +34,29 @@ describe("proxy (F07)", () => {
     expect(res.headers.get("location")).toBeNull();
   });
 
-  it("P3 auth page with session → next or /ideabank", async () => {
-    expect((await proxy(request("/auth/login", session(nowS() + 600)))).headers.get("location")).toBe("https://archibi.ca/ideabank");
+  it("P1b / without session → login, no next", async () => {
+    const res = await proxy(request("/"));
+    expect(res.status).toBe(307);
+    expect(res.headers.get("location")).toBe("https://archibi.ca/auth/login");
+  });
+
+  it("P1c / with session → Home", async () => {
+    expect((await proxy(request("/", session(nowS() + 600)))).headers.get("location")).toBeNull();
+  });
+
+  it("P1d / with a dead refresh → login + cookies cleared", async () => {
+    singleFlight.mockRejectedValueOnce(new Error("401"));
+    const res = await proxy(request("/", session(nowS() - 10)));
+    expect(res.headers.get("location")).toBe("https://archibi.ca/auth/login");
+    expect(res.cookies.get("ab_rt")?.value).toBe("");
+  });
+
+  it("P2b the hiring section stays public", async () => {
+    expect((await proxy(request("/hiring"))).headers.get("location")).toBeNull();
+  });
+
+  it("P3 auth page with session → next or Home", async () => {
+    expect((await proxy(request("/auth/login", session(nowS() + 600)))).headers.get("location")).toBe("https://archibi.ca/");
     const withNext = await proxy(request("/auth/login?next=%2Fhiring%2Fwishlist", session(nowS() + 600)));
     expect(withNext.headers.get("location")).toBe("https://archibi.ca/hiring/wishlist");
   });
@@ -48,7 +69,7 @@ describe("proxy (F07)", () => {
 
   it("P4 open-redirect guard", async () => {
     const res = await proxy(request("/auth/login?next=https%3A%2F%2Fevil.com", session(nowS() + 600)));
-    expect(res.headers.get("location")).toBe("https://archibi.ca/ideabank");
+    expect(res.headers.get("location")).toBe("https://archibi.ca/");
   });
 
   it("P5 expired access on a protected page → one refresh, cookies set, x-ab-at forwarded", async () => {

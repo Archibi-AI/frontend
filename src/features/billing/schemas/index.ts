@@ -37,6 +37,9 @@ export const SubscriptionPlanSchema = z
     image: z.string().nullish().transform((v) => v ?? ""),
     amount: z.number().int().default(0),
     currency: z.string().default("usd"),
+    shortDescription: z.string().nullish().transform((v) => v ?? ""),
+    sortOrder: z.number().int().default(0),
+    features: z.array(z.object({ uuid: z.string(), title: z.string(), iconUrl: z.string().nullish().transform((v) => v ?? "") })).default([]),
   })
   .passthrough();
 export type SubscriptionPlan = z.infer<typeof SubscriptionPlanSchema>;

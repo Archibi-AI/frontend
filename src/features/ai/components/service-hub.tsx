@@ -39,7 +39,7 @@ export function ServiceHub() {
           </ul>
         </section>
       )}
-      <h2 className="mb-4 mt-8 font-display text-xl font-medium text-ink-2">{HOME_STUDIO_TITLE}</h2>
+      <h2 className="mb-3 mt-5 text-[18px] font-bold text-ink-2">{HOME_STUDIO_TITLE}</h2>
       <ul className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
         {HOME_TOOLS.map((tool) => (
           <li key={tool.id}>
