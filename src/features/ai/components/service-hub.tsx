@@ -1,9 +1,11 @@
 "use client";
-import { ArrowRight, Lock } from "lucide-react";
+import { ChevronRight, Lock } from "lucide-react";
 import Link from "next/link";
 import { routes } from "@/shared/config/routes";
+import { FramedImage } from "@/shared/ui/framed-image";
 import { cn } from "@/shared/lib/cn";
-import { AI_SERVICES, isLocked } from "../model/services";
+import { HOME_FURNITURE, HOME_HEADING, HOME_STUDIO_TITLE, HOME_TOOLS } from "../model/home";
+import { AI_SERVICES, isLocked, serviceById } from "../model/services";
 import { CreditsPill } from "./credits-pill";
 import { useCredits, useRecentJobs } from "./use-ai";
 
@@ -14,8 +16,13 @@ export function ServiceHub() {
   const running = (jobs.data ?? []).filter((j) => j.state === "PROVIDER_RUNNING" || j.state === "PROVIDER_DONE" || j.state === "SAVING");
   return (
     <>
-      <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
-        <p className="max-w-xl text-[15px] text-subtle">Pick a service. Upload a photo, choose a style and Archibi AI designs it in under two minutes.</p>
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="font-display text-[26px] font-bold leading-tight text-[#1a1a1a] md:text-[32px]">
+            {HOME_HEADING.before} <span className="text-brand-strong">{HOME_HEADING.highlight}</span>
+          </h1>
+          <p className="mt-2 text-[15px] text-[#8a8a8a]">{HOME_HEADING.subtitle}</p>
+        </div>
         <CreditsPill />
       </div>
       {running.length > 0 && (
@@ -32,34 +39,50 @@ export function ServiceHub() {
           </ul>
         </section>
       )}
-      <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {AI_SERVICES.map((s) => {
-          const locked = isLocked(credits.data?.service_access, s.key);
-          return (
-            <li key={s.id}>
-              <Link
-                href={locked ? routes.ai.serviceNotInPlan(s.key) : s.href}
-                className={cn("group flex h-full flex-col justify-between gap-6 border border-line bg-surface p-6 transition-shadow hover:shadow-md", locked && "bg-surface-alt")}
-              >
-                <div>
-                  <div className="flex items-center justify-between gap-2">
-                    <h2 className="font-display text-xl font-medium text-ink-2">{s.title}</h2>
-                    {locked && (
-                      <span className="inline-flex items-center gap-1 rounded-pill bg-track px-2 py-1 text-xs font-medium text-muted">
-                        <Lock className="size-3" aria-hidden /> Not in your plan
-                      </span>
-                    )}
-                  </div>
-                  <p className="mt-2 text-sm text-muted">{s.blurb}</p>
-                </div>
-                <span className="inline-flex items-center gap-2 text-[13px] font-bold uppercase tracking-[.02em] text-brand">
-                  {locked ? "See plans" : "Start"} <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" aria-hidden />
-                </span>
-              </Link>
-            </li>
-          );
-        })}
+      <h2 className="mb-4 mt-8 font-display text-xl font-medium text-ink-2">{HOME_STUDIO_TITLE}</h2>
+      <ul className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
+        {HOME_TOOLS.map((tool) => (
+          <li key={tool.id}>
+            <StudioCard tool={tool} locked={isLocked(credits.data?.service_access, serviceById(tool.id).key)} layout="card" />
+          </li>
+        ))}
       </ul>
+      <div className="mt-5">
+        <StudioCard tool={HOME_FURNITURE} locked={isLocked(credits.data?.service_access, serviceById("furniture").key)} layout="strip" />
+      </div>
     </>
+  );
+}
+
+type Tool = { id: (typeof AI_SERVICES)[number]["id"]; title: string; subtitle: string; image: string };
+
+/** DesignStudioCard / FurnitureFinderStrip: banner, bold title, gray one-liner, chevron. A locked service goes to the plan page. */
+function StudioCard({ tool, locked, layout }: { tool: Tool; locked: boolean; layout: "card" | "strip" }) {
+  const service = serviceById(tool.id);
+  const href = locked ? routes.ai.serviceNotInPlan(service.key) : service.href;
+  const text = (
+    <div className="min-w-0 flex-1">
+      <p className="truncate text-[15px] font-bold text-ink-2">{tool.title}</p>
+      <p className="truncate text-xs text-subtle">{locked ? "Not in your plan" : tool.subtitle}</p>
+    </div>
+  );
+  const chevron = locked ? <Lock className="size-4 text-subtle" aria-hidden /> : <ChevronRight className="size-5 text-ink-2 transition-transform group-hover:translate-x-0.5" aria-hidden />;
+  if (layout === "strip") {
+    return (
+      <Link href={href} aria-label={tool.title} className="group flex items-center gap-3.5 overflow-hidden rounded-xl border border-line bg-surface p-2.5 transition-shadow hover:shadow-md">
+        <FramedImage src={tool.image} alt="" className="h-[60px] w-[88px] shrink-0 rounded-lg" />
+        {text}
+        {chevron}
+      </Link>
+    );
+  }
+  return (
+    <Link href={href} aria-label={tool.title} className="group block overflow-hidden rounded-xl border border-line bg-surface transition-shadow hover:shadow-md">
+      <FramedImage src={tool.image} alt="" className={cn("aspect-[4/3] w-full", locked && "opacity-60")} />
+      <div className="flex items-center gap-2 py-2.5 pl-3 pr-2 pb-3">
+        {text}
+        {chevron}
+      </div>
+    </Link>
   );
 }

@@ -55,9 +55,19 @@ describe("ServiceHub (AH1–AH3)", () => {
     server.use(credits({ service_access: { restricted: true, plan_name: "Starter", allowed_services: ["interior_design"] } }), http.get("/bff/ai/jobs", () => HttpResponse.json([])));
     renderWithProviders(<ServiceHub />);
     expect(await screen.findByText("42 renders left")).toBeInTheDocument();
-    expect(await screen.findByRole("link", { name: /Exterior Design/ })).toHaveAttribute("href", "/ai/service-not-in-plan?service=exterior_design");
-    expect(screen.getByRole("link", { name: /Interior Design/ })).toHaveAttribute("href", "/ai/interior");
+    expect(await screen.findByRole("link", { name: "Exterior" })).toHaveAttribute("href", "/ai/service-not-in-plan?service=exterior_design");
+    expect(screen.getByRole("link", { name: "Interior" })).toHaveAttribute("href", "/ai/interior");
     expect(screen.getAllByText("Not in your plan")).toHaveLength(4);
+  });
+  it("shows the app's Home copy: heading, tagline, Design Studio, the four tools and Find furniture", async () => {
+    server.use(credits(), http.get("/bff/ai/jobs", () => HttpResponse.json([])));
+    renderWithProviders(<ServiceHub />);
+    expect(await screen.findByRole("heading", { name: "Let’s design your dream space" })).toBeInTheDocument();
+    expect(screen.getByText("Snap a photo, choose a style, see the magic.")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Design Studio" })).toBeInTheDocument();
+    for (const [name, sub] of [["Interior", "Reimagine a room"], ["Exterior", "Transform your façade"], ["Landscape", "Redesign your outdoors"], ["Sketch to render", "Bring your sketch to life"], ["Find furniture", "Love a piece? We’ll help you buy it"]]) {
+      expect(screen.getByRole("link", { name })).toHaveTextContent(sub!);
+    }
   });
   it("AH3: running jobs are listed and link to their result", async () => {
     server.use(credits(), http.get("/bff/ai/jobs", () => HttpResponse.json([{ projectUuid: ID, service: "sketch", state: "PROVIDER_RUNNING", createdAt: 1 }, { projectUuid: "x", service: "interior", state: "DONE", createdAt: 2 }])));

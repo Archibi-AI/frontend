@@ -57,7 +57,7 @@ export function PlanCard({ summary }: { summary: AccountSummary }) {
           Manage plan
         </Link>
         {(plan.canUpgrade || isFreePlan(plan)) && (
-          <Link href={routes.billing.index("subscriptions")} className={buttonVariants({ size: "sm", className: "border-white bg-white text-brand hover:bg-brand-tint hover:text-brand-strong" })}>
+          <Link href={routes.billing.index("subscriptions")} className={buttonVariants({ size: "sm", className: "!border-white !bg-white !text-brand hover:!bg-brand-tint hover:!text-brand-strong" })}>
             Upgrade
           </Link>
         )}

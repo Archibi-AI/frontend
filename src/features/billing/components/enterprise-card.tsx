@@ -1,4 +1,5 @@
 "use client";
+import { Building2 } from "lucide-react";
 import { useState } from "react";
 import { AppError } from "@/shared/errors/app-error";
 import { bffFetch } from "@/shared/http/bff-fetch";
@@ -31,8 +32,15 @@ export function EnterpriseCard() {
 
   return (
     <section aria-labelledby="enterprise-title" className="rounded-lg border border-line bg-surface p-5 shadow-card md:p-6">
-      <h2 id="enterprise-title" className="text-lg font-semibold text-brand">{PaywallText.enterpriseTitle}</h2>
-      <p className="mt-1.5 text-sm text-subtle">{PaywallText.enterpriseBody}</p>
+      <div className="flex items-start gap-3.5">
+        <span aria-hidden className="flex size-11 shrink-0 items-center justify-center rounded-pill bg-brand-tint text-brand">
+          <Building2 className="size-5" />
+        </span>
+        <div className="min-w-0">
+          <h2 id="enterprise-title" className="text-lg font-semibold text-brand">{PaywallText.enterpriseTitle}</h2>
+          <p className="mt-1.5 text-sm text-subtle">{PaywallText.enterpriseBody}</p>
+        </div>
+      </div>
       <Button variant="secondary" size="lg" loading={busy} onClick={contact} className="mt-4 w-full rounded-pill border-[1.5px] border-brand normal-case tracking-normal text-brand hover:bg-brand hover:text-white">
         <span className="text-[15px] font-semibold">{PaywallText.enterpriseButton}</span>
       </Button>

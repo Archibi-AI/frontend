@@ -51,9 +51,12 @@
   --shadow-focus: 0 0 0 2px rgb(231 0 57 / 0.1);
 
   /* breakpoints (archibi.ca) */
+  /* every breakpoint in px: Tailwind sorts media queries by unit, so a rem `sm` would land AFTER `lg` and override it */
+  --breakpoint-sm: 640px;
   --breakpoint-md: 768px;
   --breakpoint-lg: 1025px;
   --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
 }
 
 /* Dark mode is out of scope for v1 — the app is light-only. */

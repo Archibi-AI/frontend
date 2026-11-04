@@ -38,7 +38,7 @@ export function SocialButtons({ next }: { next: string | null }) {
     <>
       <OrDivider />
       <FormAlert>{error}</FormAlert>
-      <div className="space-y-3">
+      <div className="grid grid-cols-2 gap-3">
         <GoogleButton onCredential={onGoogle} disabled={busy} />
         <AppleButton next={next} onIdToken={onApple} onError={() => setError(AppMessages.somethingWrong)} disabled={busy} />
       </div>

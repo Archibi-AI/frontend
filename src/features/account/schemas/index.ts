@@ -50,7 +50,18 @@ export const UpdateProfileResponseSchema = z.object({
 export const MessageSchema = z.object({ message: z.string() });
 
 /** GET account/transactions/ — frontend/account/api/account-transactions.md (extra keys kept) */
-export const TransactionSchema = z.object({ uuid: z.string(), code: z.string(), status: z.string() }).passthrough();
+/** GET account/transactions/ — PaymentRecordsAPIView: uuid, code, status, price (major units), creditCount, timestamp, currency. */
+export const TransactionSchema = z
+  .object({
+    uuid: z.string(),
+    code: z.string(),
+    status: z.string(),
+    price: z.union([z.number(), z.string()]).nullish(),
+    creditCount: z.number().int().nullish(),
+    timestamp: z.string().nullish(),
+    currency: z.string().nullish(),
+  })
+  .passthrough();
 export const TransactionsSchema = z.object({ transactions: z.array(TransactionSchema) });
 export type Transaction = z.infer<typeof TransactionSchema>;
 

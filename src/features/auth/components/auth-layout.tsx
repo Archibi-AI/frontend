@@ -1,45 +1,13 @@
-import { FolderOpen, Lightbulb, Sparkles, Users } from "lucide-react";
-import Image from "next/image";
 import type { ReactNode } from "react";
+import { AuthSlides } from "./auth-slides";
 
-const POINTS = [
-  { icon: Sparkles, title: "Redesign with AI", description: "Restyle any room, facade or garden from a single photo." },
-  { icon: Lightbulb, title: "Find your idea", description: "Browse real interiors, exteriors and landscapes in the Idea Bank." },
-  { icon: Users, title: "Hire trusted pros", description: "Connect with vetted architects, designers and builders." },
-  { icon: FolderOpen, title: "One account, everywhere", description: "Your projects and renders stay in sync with the Archibi app." },
-] as const;
-
-/** Split auth shell — the Uritect professionals panel pattern: dark photo hero on the left, form on the right.
+/** Split auth shell: the app's welcome slides on the left, the form on the right.
  *  Two equal halves with their content centred, so it stays balanced from 1024 px to ultra-wide screens. */
 export function AuthLayout({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-[calc(100dvh-4rem)]">
-      <aside className="relative hidden w-1/2 shrink-0 overflow-hidden bg-night lg:block" aria-hidden={false}>
-        <Image src="/web-static/brand/auth.jpg" alt="" fill sizes="50vw" className="object-cover" priority />
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgb(18_18_18/.84)_0%,rgb(18_18_18/.9)_55%,rgb(18_18_18/.97)_100%)]" aria-hidden />
-        <div className="relative mx-auto flex h-full w-full max-w-[560px] flex-col justify-center gap-10 overflow-y-auto px-12 py-16">
-          <div className="animate-fade-rise">
-            <h2 className="hero-display mb-4 text-white">
-              Design it. Find it.
-              <br />
-              Build it <span className="text-brand-bright">with Archibi.</span>
-            </h2>
-            <p className="max-w-[380px] text-base leading-[1.6] text-night-text">Everything for your next space, in one place.</p>
-          </div>
-          <ul className="space-y-6">
-            {POINTS.map(({ icon: Icon, title, description }) => (
-              <li key={title} className="flex items-start gap-4">
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-sm border border-white/15 bg-white/5">
-                  <Icon size={18} strokeWidth={1.5} className="text-brand-bright" aria-hidden />
-                </div>
-                <div>
-                  <p className="text-[15px] font-medium text-white">{title}</p>
-                  <p className="text-[13px] text-night-muted">{description}</p>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
+      <aside className="relative hidden w-1/2 shrink-0 overflow-hidden bg-night lg:block" aria-label="Archibi AI">
+        <AuthSlides />
       </aside>
       <div className="flex flex-1 items-center justify-center bg-surface px-6 py-12 md:py-16">
         <div className="w-full max-w-[420px] animate-fade-rise">{children}</div>

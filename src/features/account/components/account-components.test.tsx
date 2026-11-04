@@ -13,7 +13,7 @@ import { PlanCard } from "./plan-card";
 import { PrivacyPanel } from "./privacy-panel";
 import { ProjectsGrid } from "./projects-grid";
 import { SupportForm } from "./support-form";
-import { statusTone, TransactionsList } from "./transactions-list";
+import { statusIcon, TransactionsList } from "./transactions-list";
 
 setupComponentTest();
 const err = (status: number, code: string, message: string) => HttpResponse.json({ error: { code, message } }, { status });
@@ -169,19 +169,33 @@ describe("ManagePlanPanel (ManagePlanScreen)", () => {
 });
 
 describe("lists", () => {
-  it("transactions: pages until an empty page, status tones", async () => {
+  it("transactions: app-style cards (price, credits, date, payment id), status icons, copy, pages until an empty page", async () => {
     const pages: Record<string, unknown> = {
-      "1": { transactions: [{ uuid: "1", code: "PI_a", status: "completed" }, { uuid: "2", code: "PI_b", status: "failed" }] },
+      "1": { transactions: [
+        { uuid: "1", code: "PI_a", status: "completed", price: "19.99", currency: "CAD", creditCount: 50, timestamp: "2026-10-20T14:03:11Z" },
+        { uuid: "2", code: "PI_b", status: "failed", price: 5, currency: "USD", creditCount: 10, timestamp: "2026-10-21T09:00:00Z" },
+      ] },
     };
     server.use(http.get("*/bff/account/transactions", ({ request }) => {
       const page = new URL(request.url).searchParams.get("page") ?? "1";
       return pages[page] ? HttpResponse.json(pages[page]) : err(404, "INVALID_PAGE", "Invalid page.");
     }));
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    vi.stubGlobal("navigator", { ...navigator, clipboard: { writeText } });
     renderWithProviders(<TransactionsList />);
-    expect(await screen.findByText("PI_a")).toBeInTheDocument();
-    expect(screen.getByText("failed")).toHaveClass("text-danger");
-    expect(statusTone("pending")).toContain("warning");
-    expect(statusTone("???")).toContain("subtle");
+    expect(await screen.findByText("19.99 CAD")).toBeInTheDocument();
+    expect(screen.getByText("5.00 USD")).toBeInTheDocument();
+    expect(screen.getByText("Credits: 50")).toBeInTheDocument();
+    expect(screen.getByText("2026-10-20")).toBeInTheDocument();
+    expect(screen.getByText("Payment ID: PI_a")).toBeInTheDocument();
+    expect(screen.getByLabelText("completed")).toHaveClass("text-success");
+    expect(screen.getByLabelText("failed")).toBeInTheDocument();
+    expect(statusIcon("canceled").tone).toContain("ffa000");
+    expect(statusIcon("pending").tone).toContain("subtle");
+    await userEvent.click(screen.getAllByRole("button", { name: "Copy Payment ID" })[0]!);
+    expect(writeText).toHaveBeenCalledWith("PI_a");
+    expect(await screen.findByText("Payment ID copied")).toBeInTheDocument();
+    vi.unstubAllGlobals();
   });
   it("transactions: empty state", async () => {
     server.use(http.get("*/bff/account/transactions", () => HttpResponse.json({ transactions: [] })));
