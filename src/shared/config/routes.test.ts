@@ -7,8 +7,8 @@ const builders: string[] = [
   routes.hiring.index(), routes.hiring.section("Designer"), routes.hiring.category("Interior", "Designer", "7"), routes.hiring.tag("a/b"),
   routes.hiring.professional("u"), routes.hiring.professionalProjects("u"), routes.hiring.wishlist(),
   routes.ai.index(), routes.ai.interior(), routes.ai.sketch(), routes.ai.result("p"), routes.ai.serviceNotInPlan("interior_design"),
-  routes.account.index(), routes.account.privacy(), routes.billing.index("credits"), routes.billing.checkout("credits", "price_1"),
-  routes.billing.result({ status: "completed", kind: "credits", id: "price_1" }),
+  routes.account.index(), routes.account.privacy(), routes.billing.index(), routes.billing.checkout("subscription", "price_1"),
+  routes.billing.result({ status: "completed", kind: "subscription", id: "price_1" }),
 ];
 
 describe("routes", () => {

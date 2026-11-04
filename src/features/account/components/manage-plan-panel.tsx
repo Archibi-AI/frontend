@@ -62,7 +62,7 @@ export function ManagePlanPanel({ initial }: { initial: AccountSummary }) {
           <>
             <h2 className="font-display text-lg font-medium text-ink-2">You&apos;re on the free plan</h2>
             <p className="mt-1 text-[15px] text-subtle">{rendersLine(plan)}. Upgrade for more renders every month.</p>
-            <Link href={routes.billing.index("subscriptions")} className={buttonVariants({ className: "mt-4" })}>See plans</Link>
+            <Link href={routes.billing.index()} className={buttonVariants({ className: "mt-4" })}>See plans</Link>
           </>
         )}
         {provider === "stripe" && (

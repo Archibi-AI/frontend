@@ -6,7 +6,7 @@ export const PaywallText = {
   subtitle: "Choose the right plan for you",
   currentPlan: "Current plan",
   empty: "No subscription plans available right now.",
-  unavailable: "Subscriptions are not available yet. You can still buy renders.",
+  unavailable: "Subscriptions are not available yet. Please check back soon.",
   processing: "Your subscription is being activated. Credits will appear shortly.",
   enterpriseTitle: "Are you an enterprise? Contact us",
   enterpriseBody: "To buy more credits and features for your team, contact us with the button below.",

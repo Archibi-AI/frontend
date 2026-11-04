@@ -23,10 +23,9 @@ export function OutOfCredits() {
   const { data } = useCredits();
   return (
     <Card title="You're out of renders" actions={<>
-      <Link href={routes.billing.index("credits")} className={buttonVariants()}>Get more renders</Link>
-      <Link href={routes.billing.index("subscriptions")} className={buttonVariants({ variant: "secondary" })}>See plans</Link>
+      <Link href={routes.billing.index()} className={buttonVariants()}>See plans</Link>
     </>}>
-      {data ? <p>You have {data.ai_credits} {data.ai_credits === 1 ? "render" : "renders"} left.</p> : <p>Top up or pick a plan to keep designing.</p>}
+      {data ? <p>You have {data.ai_credits} {data.ai_credits === 1 ? "render" : "renders"} left.</p> : <p>Pick a plan to keep designing.</p>}
     </Card>
   );
 }
@@ -39,7 +38,7 @@ export function ServiceNotInPlan({ service }: { service?: string }) {
   const plan = data?.service_access?.plan_name;
   return (
     <Card title="Not in your plan" actions={<>
-      <Link href={routes.billing.index("subscriptions")} className={buttonVariants()}>Upgrade</Link>
+      <Link href={routes.billing.index()} className={buttonVariants()}>Upgrade</Link>
       <Link href={routes.ai.index()} className={buttonVariants({ variant: "secondary" })}>Back to AI Studio</Link>
     </>}>
       <p>{known ? `${label} isn't included in your ${plan ? `${plan} ` : ""}plan.` : "This service isn't included in your current plan."}</p>

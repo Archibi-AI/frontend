@@ -2,7 +2,6 @@
 const enc = encodeURIComponent;
 
 export type GalleryType = "interior" | "exterior" | "landscape";
-export type BillingSection = "all" | "credits" | "subscriptions";
 
 export const routes = {
   auth: {
@@ -53,9 +52,9 @@ export const routes = {
     support: () => "/account/support",
   },
   billing: {
-    index: (section: BillingSection = "all") => `/billing?section=${section}`,
-    checkout: (kind: "credits" | "subscription", id: string) => `/billing/checkout/${kind}/${enc(id)}`,
-    result: (q: { status: string; kind: "credits" | "subscription"; id: string; months?: number; t?: number }) => {
+    index: () => "/billing",
+    checkout: (kind: "subscription", id: string) => `/billing/checkout/${kind}/${enc(id)}`,
+    result: (q: { status: string; kind: "subscription"; id: string; months?: number; t?: number }) => {
       const params = new URLSearchParams();
       for (const [k, v] of Object.entries(q)) if (v !== undefined) params.set(k, String(v));
       return `/billing/result?${params.toString()}`;

@@ -37,7 +37,7 @@ describe("PlanCard (Plan & Billing)", () => {
       rendersRemaining: 5, nextExpiry: { rendersRemaining: 5, expiresOn: "2026-12-01", monthsLeft: 1 }, lots: [{ rendersRemaining: 5, source: "stripe", expiresOn: "2026-12-01" }],
     });
     renderWithProviders(<PlanCard summary={free} />);
-    expect(screen.getByRole("link", { name: "Upgrade" })).toHaveAttribute("href", "/billing?section=subscriptions");
+    expect(screen.getByRole("link", { name: "Upgrade" })).toHaveAttribute("href", "/billing");
     expect(screen.getByText(/5 renders expire on Dec 1, 2026/)).toBeInTheDocument();
   });
 });
@@ -164,7 +164,7 @@ describe("ManagePlanPanel (ManagePlanScreen)", () => {
   });
   it("Free plan links to the plans", () => {
     renderWithProviders(<ManagePlanPanel initial={summary({ kind: "free", name: "Free", provider: null, rendersAllowance: 0, rendersRemaining: 2, renewsOn: null })} />);
-    expect(screen.getByRole("link", { name: "See plans" })).toHaveAttribute("href", "/billing?section=subscriptions");
+    expect(screen.getByRole("link", { name: "See plans" })).toHaveAttribute("href", "/billing");
   });
 });
 

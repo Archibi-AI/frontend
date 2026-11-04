@@ -82,17 +82,29 @@ describe("StudioForm (IN1, IN4–IN6, SKF2)", () => {
   it("IN5: Generate is disabled until an image is chosen", async () => {
     server.use(credits(), http.get("/bff/ai/filters", () => HttpResponse.json(filters)));
     studio();
-    expect(await screen.findByText("Living Room")).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Room Type" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Generate" })).toBeDisabled();
     await upload();
     expect(screen.getByRole("button", { name: "Generate" })).toBeEnabled();
+  });
+
+  it("each filter is a dropdown that opens the picker dialog; the button then shows the pick, and a typed value is allowed", async () => {
+    server.use(credits(), http.get("/bff/ai/filters", () => HttpResponse.json(filters)));
+    studio();
+    await userEvent.click(await screen.findByRole("button", { name: "Room Type" }));
+    const dialog = await screen.findByRole("dialog");
+    expect(dialog).toHaveTextContent("Didn't find your room type?");
+    expect(within(dialog).getByText("No worries, type your own below.")).toBeInTheDocument();
+    await userEvent.type(within(dialog).getByPlaceholderText("Your room type"), "Sunroom{Enter}");
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    expect(screen.getByRole("button", { name: "Sunroom" })).toBeInTheDocument();
   });
 
   it("IN1: switching mode refetches filters with section=creative", async () => {
     const sections: string[] = [];
     server.use(credits(), http.get("/bff/ai/filters", ({ request }) => { sections.push(new URL(request.url).searchParams.get("section")!); return HttpResponse.json(filters); }));
     studio();
-    await screen.findByText("Living Room");
+    await screen.findByRole("button", { name: "Room Type" });
     await userEvent.click(screen.getByRole("radio", { name: /Creative/ }));
     await waitFor(() => expect(sections).toEqual(["beautiful", "creative"]));
   });
@@ -101,8 +113,10 @@ describe("StudioForm (IN1, IN4–IN6, SKF2)", () => {
     server.use(credits(), http.get("/bff/ai/filters", () => HttpResponse.json(filters)));
     const posted = captureJobPost();
     studio();
-    await userEvent.click(await screen.findByRole("button", { name: "Living Room" }));
-    await userEvent.click(screen.getByRole("button", { name: "Modern" }));
+    await userEvent.click(await screen.findByRole("button", { name: "Room Type" }));
+    await userEvent.click(await screen.findByRole("button", { name: "Living Room" })); // picking closes the dialog, like the app
+    await userEvent.click(screen.getByRole("button", { name: "Design Style" }));
+    await userEvent.click(await screen.findByRole("button", { name: "Modern" }));
     await userEvent.click(screen.getByRole("button", { name: /Optional/ }));
     await userEvent.click(screen.getByRole("button", { name: "Oak" }));
     await userEvent.type(screen.getByLabelText("Describe it (optional)"), "bright");
@@ -122,7 +136,7 @@ describe("StudioForm (IN1, IN4–IN6, SKF2)", () => {
     server.use(credits({ service_access: { restricted: true, allowed_services: ["exterior_design"] } }), http.get("/bff/ai/filters", () => HttpResponse.json(filters)),
       http.post("/bff/ai/jobs", () => { jobs(); return HttpResponse.json({}); }));
     studio();
-    await screen.findByText("Living Room");
+    await screen.findByRole("button", { name: "Room Type" });
     await waitFor(() => expect(screen.getByText("42 renders left")).toBeInTheDocument());
     await upload();
     await userEvent.click(screen.getByRole("button", { name: "Generate" }));
@@ -137,7 +151,7 @@ describe("StudioForm (IN1, IN4–IN6, SKF2)", () => {
   ])("IN6: start error %s navigates to %s", async (code, status, to) => {
     server.use(credits(), http.get("/bff/ai/filters", () => HttpResponse.json(filters)), http.post("/bff/ai/jobs", () => HttpResponse.json({ error: { code, message: "m" } }, { status })));
     studio();
-    await screen.findByText("Living Room");
+    await screen.findByRole("button", { name: "Room Type" });
     await upload();
     await userEvent.click(screen.getByRole("button", { name: "Generate" }));
     await waitFor(() => expect(router.push).toHaveBeenCalledWith(to));
@@ -146,7 +160,7 @@ describe("StudioForm (IN1, IN4–IN6, SKF2)", () => {
   it("an upload/validation message is shown inline", async () => {
     server.use(credits(), http.get("/bff/ai/filters", () => HttpResponse.json(filters)), http.post("/bff/ai/jobs", () => HttpResponse.json({ error: { code: "UNKNOWN", message: "Image is too small." } }, { status: 400 })));
     studio();
-    await screen.findByText("Living Room");
+    await screen.findByRole("button", { name: "Room Type" });
     await upload();
     await userEvent.click(screen.getByRole("button", { name: "Generate" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("Image is too small.");
@@ -157,7 +171,7 @@ describe("StudioForm (IN1, IN4–IN6, SKF2)", () => {
     const seen: string[] = [];
     server.use(credits(), http.get("/bff/ai/filters", ({ request }) => { const q = new URL(request.url).searchParams; seen.push(`${q.get("part")}/${q.get("section")}`); return HttpResponse.json(filters); }));
     studio("sketch");
-    await screen.findByText("Living Room");
+    await screen.findByRole("button", { name: "Room Type" });
     await userEvent.click(screen.getByRole("tab", { name: "Landscape" }));
     await waitFor(() => expect(seen).toEqual(["Interior/sketch-to-render", "Landscape/sketch-to-render"]));
   });
@@ -273,19 +287,19 @@ describe("ResultView (RS1, RS2, RS4)", () => {
 });
 
 describe("outcome screens (OC1–OC3)", () => {
-  it("OC2: out of credits shows the balance and the two billing links, no one-pack offer", async () => {
+  it("OC2: out of credits shows the balance and one link to the plans, no render packs", async () => {
     server.use(credits({ ai_credits: 0 }));
     renderWithProviders(<OutOfCredits />);
     expect(await screen.findByText("You have 0 renders left.")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Get more renders" })).toHaveAttribute("href", "/billing?section=credits");
-    expect(screen.getByRole("link", { name: "See plans" })).toHaveAttribute("href", "/billing?section=subscriptions");
+    expect(screen.getByRole("link", { name: "See plans" })).toHaveAttribute("href", "/billing");
+    expect(screen.queryByRole("link", { name: "Get more renders" })).not.toBeInTheDocument();
     expect(screen.queryByText(/pack/i)).not.toBeInTheDocument();
   });
   it("OC1: names the service and the plan", async () => {
     server.use(credits({ service_access: { restricted: true, plan_name: "Starter", allowed_services: [] } }));
     renderWithProviders(<ServiceNotInPlan service="exterior_design" />);
     expect(await screen.findByText("Exterior Design isn't included in your Starter plan.")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Upgrade" })).toHaveAttribute("href", "/billing?section=subscriptions");
+    expect(screen.getByRole("link", { name: "Upgrade" })).toHaveAttribute("href", "/billing");
     expect(screen.getByRole("link", { name: "Back to AI Studio" })).toHaveAttribute("href", "/ai");
   });
   it("OC3: an unknown or missing service falls back to generic text", async () => {
